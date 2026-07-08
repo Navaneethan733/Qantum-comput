@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Dashboard — Stackly</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── Tokens ── */
+:root{
+  --paper:#F7F5F1; --paper-2:#fff; --card:#EFEDE8; --card-2:#E7E3DC;
+  --ink:#121212; --ink-soft:#4A4944; --ink-dim:#8C8A84;
+  --line:rgba(18,18,18,.10); --line-soft:rgba(18,18,18,.06);
+  --ion:#4D5BFF; --ion-soft:#E4E6FF; --ion-2:#9AA3FF;
+  --green:#2A7D4F; --green-soft:#E3F5EC;
+  --amber:#C08A2A; --amber-soft:#FBF3E3;
+  --red:#C4493D; --red-soft:#FBECEA;
+  --f-d:'Space Grotesk',sans-serif;
+  --f-b:'Inter',sans-serif;
+  --f-m:'JetBrains Mono',monospace;
+  --ease:cubic-bezier(.16,1,.3,1);
+  --topbar-h:60px;
+  --radius:14px;
+}
+
+/* ── Reset ── */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{height:100%;font-size:15px;overflow-x:hidden;}
+body{min-height:100vh;background:var(--paper);color:var(--ink);font-family:var(--f-b);
+  display:block;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+a{color:inherit;text-decoration:none;}
+img{display:block;max-width:100%;}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+input,select,textarea{font-family:inherit;color:inherit;}
+ul{list-style:none;}
+::selection{background:var(--ion);color:#fff;}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px;}
+::-webkit-scrollbar-thumb:hover{background:var(--ink-dim);}
+
+/* ═════════════ CONTAINER & FOOTER ═════════════ */
+.container {
+  width: 100%;
+  max-width: var(--maxw, 1240px);
+  margin: 0 auto;
+  padding: 0 clamp(20px, 5.5vw, 64px);
+}
+.topnav-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+.dashboard-footer {
+  background: var(--paper-2);
+  border-top: 1px solid var(--line);
+  padding: 24px 0;
+  margin-top: auto;
+}
+.dashboard-footer .footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  color: var(--ink-dim);
+  width: 100%;
+}
+.dashboard-footer .footer-links {
+  display: flex;
+  gap: 20px;
+}
+.dashboard-footer .footer-links a {
+  color: var(--ink-soft);
+  transition: color 0.25s ease;
+  font-weight: 500;
+}
+.dashboard-footer .footer-links a:hover {
+  color: var(--ion);
+}
+
+/* ═════════════ TOP NAVBAR ═════════════ */
+.topnav{
+  position:sticky;top:0;z-index:200;
+  background:var(--ink);
+  color:#fff;
+  height:var(--topbar-h);
+  display:flex;align-items:center;
+  padding:0;
+  border-bottom:2px solid rgba(77,91,255,.3);
+  box-shadow:0 4px 24px rgba(0,0,0,.15);
+}
+.topnav-logo{
+  display:flex;align-items:center;gap:10px;
+  font-family:var(--f-d);font-weight:600;font-size:1.05rem;
+  color:#fff;text-decoration:none;
+  margin-right:32px;flex-shrink:0;
+}
+.topnav-logo-mark{color:var(--ion-2);display:inline-flex;}
+.topnav-links{
+  display:flex;align-items:center;gap:2px;flex:1;overflow-x:auto;
+}
+.nav-item{
+  display:flex;align-items:center;gap:7px;
+  padding:8px 14px;border-radius:8px;
+  cursor:pointer;white-space:nowrap;
+  font-size:.85rem;font-weight:500;color:rgba(255,255,255,.6);
+  transition:background .22s ease,color .22s ease;
+  position:relative;
+}
+.nav-item:hover{background:rgba(255,255,255,.07);color:#fff;}
+.nav-item.active{background:rgba(77,91,255,.3);color:#fff;}
+.nav-item.active::after{
+  content:'';position:absolute;bottom:-2px;left:14px;right:14px;height:2px;
+  background:var(--ion-2);border-radius:2px 2px 0 0;
+}
+.nav-icon{font-size:.9rem;}
+.nav-badge{
+  background:var(--ion);color:#fff;
+  font-family:var(--f-m);font-size:.58rem;border-radius:999px;padding:1px 6px;
+}
+
+.topnav-right{display:flex;align-items:center;gap:8px;margin-left:auto;flex-shrink:0;}
+.topnav-search{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);
+  border-radius:999px;padding:7px 14px;
+  transition:border-color .25s ease,box-shadow .25s ease;
+  min-width:200px;
+}
+.topnav-search:focus-within{border-color:var(--ion);box-shadow:0 0 0 3px var(--ion-soft);}
+.topnav-search input{border:none;background:transparent;outline:none;font-size:.84rem;width:100%;color:#fff;}
+.topnav-search input::placeholder{color:rgba(255,255,255,.35);}
+.search-icon{color:rgba(255,255,255,.4);font-size:.9rem;flex-shrink:0;}
+.topnav-btn{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;position:relative;transition:background .22s ease;color:#fff;}
+.topnav-btn:hover{background:rgba(255,255,255,.1);}
+.topbar-badge{position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:var(--red);border:1.5px solid var(--ink);}
+.topnav-chip{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);
+  border-radius:999px;padding:5px 14px 5px 6px;cursor:pointer;
+  transition:background .22s ease;
+}
+.topnav-chip:hover{background:rgba(255,255,255,.18);}
+.chip-avatar{width:26px;height:26px;border-radius:50%;background:var(--ion);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--f-d);font-weight:700;font-size:.68rem;}
+.chip-name{font-size:.82rem;font-weight:600;color:#fff;}
+
+/* Mobile hamburger */
+.topnav-hamburger{display:none;width:36px;height:36px;border-radius:8px;align-items:center;justify-content:center;color:#fff;transition:background .22s ease;margin-right:8px;}
+.topnav-hamburger:hover{background:rgba(255,255,255,.1);}
+.ham-icon{display:flex;flex-direction:column;gap:4.5px;}
+.ham-icon span{width:18px;height:1.5px;background:#fff;border-radius:2px;display:block;}
+
+/* Mobile nav drawer */
+.topnav-drawer{display:none;flex-direction:column;background:var(--ink);border-bottom:1px solid rgba(77,91,255,.2);padding:8px 0;}
+.topnav-drawer.open{display:flex;}
+.topnav-drawer .nav-item{border-radius:0;padding:12px 24px;}
+.topnav-drawer .nav-item.active::after{display:none;}
+.topnav-drawer .nav-item.active{border-left:3px solid var(--ion-2);}
+
+/* ═════════════ MAIN ═════════════ */
+.main-wrap{display:flex;flex-direction:column;min-height:calc(100vh - var(--topbar-h));}
+
+/* ── Page content ── */
+.page{display:flex;flex-direction:column;flex:1;padding:32px 0 64px;gap:24px;}
+
+/* ── Page header ── */
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.page-header h1{font-family:var(--f-d);font-size:1.45rem;font-weight:600;letter-spacing:-.01em;}
+.page-header p{font-size:.875rem;color:var(--ink-soft);margin-top:4px;}
+.page-header-actions{display:flex;gap:10px;align-items:center;flex-shrink:0;}
+
+/* ── Buttons ── */
+.btn{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:10px 20px;border-radius:999px;
+  font-size:.85rem;font-weight:600;
+  transition:transform .3s var(--ease),background .25s ease,box-shadow .3s ease;
+  white-space:nowrap;
+}
+.btn:hover{transform:translateY(-1px);}
+.btn-primary{background:var(--ink);color:#fff;}
+.btn-primary:hover{background:#000;box-shadow:0 8px 20px -6px rgba(18,18,18,.3);}
+.btn-ion{background:var(--ion);color:#fff;}
+.btn-ion:hover{background:#3345dd;box-shadow:0 8px 20px -6px rgba(77,91,255,.4);}
+.btn-ghost{border:1px solid var(--line);background:transparent;}
+.btn-ghost:hover{background:var(--card);border-color:var(--line);}
+.btn-sm{padding:7px 14px;font-size:.78rem;}
+
+/* ── Stat cards ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+.stat-card{
+  background:var(--paper-2);border:1px solid var(--line);
+  border-radius:var(--radius);padding:22px 20px;
+  display:flex;flex-direction:column;gap:12px;
+  transition:transform .3s var(--ease),box-shadow .3s ease,border-color .25s ease;
+  position:relative;overflow:hidden;
+}
+.stat-card:hover{transform:translateY(-3px);box-shadow:0 12px 32px -8px rgba(18,18,18,.1);border-color:var(--ion-2);}
+.stat-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:var(--ion);opacity:0;transition:opacity .3s ease;
+}
+.stat-card:hover::before{opacity:1;}
+.stat-top{display:flex;align-items:center;justify-content:space-between;}
+.stat-label{font-family:var(--f-m);font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-dim);}
+.stat-icon{
+  width:34px;height:34px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;font-size:.9rem;
+}
+.stat-icon.blue{background:var(--ion-soft);color:var(--ion);}
+.stat-icon.green{background:var(--green-soft);color:var(--green);}
+.stat-icon.amber{background:var(--amber-soft);color:var(--amber);}
+.stat-icon.red{background:var(--red-soft);color:var(--red);}
+.stat-num{font-family:var(--f-m);font-size:1.6rem;font-weight:600;letter-spacing:-.02em;}
+.stat-delta{display:flex;align-items:center;gap:5px;font-size:.78rem;}
+.stat-delta.up{color:var(--green);}
+.stat-delta.down{color:var(--red);}
+.stat-delta-label{color:var(--ink-dim);font-size:.76rem;}
+
+/* ── Cards ── */
+.card{
+  background:var(--paper-2);border:1px solid var(--line);
+  border-radius:var(--radius);overflow:hidden;
+}
+.card-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 20px;border-bottom:1px solid var(--line);
+}
+.card-title{font-family:var(--f-d);font-weight:600;font-size:.95rem;}
+.card-subtitle{font-size:.78rem;color:var(--ink-dim);margin-top:2px;}
+.card-body{padding:20px;}
+
+/* ── Two-col grid ── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.grid-3-1{display:grid;grid-template-columns:2fr 1fr;gap:20px;}
+
+/* ── Table ── */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+th{
+  font-family:var(--f-m);font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-dim);font-weight:500;
+  padding:10px 16px;border-bottom:1px solid var(--line);text-align:left;
+  white-space:nowrap;
+}
+td{
+  padding:13px 16px;border-bottom:1px solid var(--line-soft);
+  font-size:.85rem;vertical-align:middle;
+}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(247,245,241,.6);}
+.td-mono{font-family:var(--f-m);font-size:.8rem;}
+.td-name{font-weight:600;}
+
+/* ── Badges ── */
+.badge{
+  display:inline-flex;align-items:center;gap:5px;
+  border-radius:999px;padding:3px 10px;font-size:.74rem;font-weight:500;
+}
+.badge-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.badge-success{background:var(--green-soft);color:var(--green);}
+.badge-success .badge-dot{background:var(--green);}
+.badge-warn{background:var(--amber-soft);color:var(--amber);}
+.badge-warn .badge-dot{background:var(--amber);}
+.badge-error{background:var(--red-soft);color:var(--red);}
+.badge-error .badge-dot{background:var(--red);}
+.badge-info{background:var(--ion-soft);color:var(--ion);}
+.badge-info .badge-dot{background:var(--ion);}
+.badge-neutral{background:var(--card);color:var(--ink-soft);}
+.badge-neutral .badge-dot{background:var(--ink-dim);}
+
+/* ── Progress bar ── */
+.progress-bar{
+  height:6px;border-radius:3px;background:var(--card);overflow:hidden;margin:6px 0;
+}
+.progress-fill{
+  height:100%;border-radius:3px;background:var(--ion);
+  transition:width 1.2s var(--ease);
+}
+.progress-fill.green{background:var(--green);}
+.progress-fill.amber{background:var(--amber);}
+.progress-fill.red{background:var(--red);}
+
+/* ── Chart area ── */
+.chart-area{padding:20px;position:relative;}
+.chart-svg{width:100%;display:block;}
+.chart-grid-line{stroke:var(--line);stroke-width:1;}
+.chart-line{fill:none;stroke:var(--ion);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;}
+.chart-line-2{fill:none;stroke:var(--green);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:5 3;}
+.chart-area-fill{fill:url(#areaGrad);opacity:.4;}
+.chart-dot{fill:var(--ion);stroke:#fff;stroke-width:2;}
+.chart-labels{display:flex;justify-content:space-between;padding:0 20px 4px;font-family:var(--f-m);font-size:.68rem;color:var(--ink-dim);}
+.chart-legend{display:flex;gap:18px;padding:0 20px 16px;font-size:.78rem;color:var(--ink-soft);}
+.legend-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:middle;}
+.legend-ion{background:var(--ion);}
+.legend-green{background:var(--green);}
+
+/* ── Usage ring ── */
+.usage-ring-wrap{
+  display:flex;flex-direction:column;align-items:center;gap:12px;padding:24px 20px;
+}
+.usage-ring-svg{width:140px;height:140px;}
+.ring-track{fill:none;stroke:var(--card);stroke-width:14;}
+.ring-fill{fill:none;stroke:var(--ion);stroke-width:14;stroke-linecap:round;
+  stroke-dasharray:360;stroke-dashoffset:360;
+  transform:rotate(-90deg);transform-origin:50% 50%;
+  transition:stroke-dashoffset 1.4s var(--ease);
+}
+.ring-fill.green{stroke:var(--green);}
+.ring-fill.amber{stroke:var(--amber);}
+.ring-center{
+  position:relative;display:inline-block;
+}
+.usage-labels{width:100%;display:flex;flex-direction:column;gap:10px;}
+.usage-label-row{
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:.82rem;
+}
+.usage-label-left{display:flex;align-items:center;gap:8px;color:var(--ink-soft);}
+.usage-label-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.usage-label-val{font-family:var(--f-m);font-weight:600;font-size:.82rem;}
+
+/* ── Recent circuits list ── */
+.circuit-list{display:flex;flex-direction:column;}
+.circuit-item{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 20px;border-bottom:1px solid var(--line-soft);
+  transition:background .22s ease;cursor:pointer;
+}
+.circuit-item:last-child{border-bottom:none;}
+.circuit-item:hover{background:var(--paper);}
+.circuit-icon{
+  width:36px;height:36px;border-radius:8px;background:var(--ion-soft);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.9rem;flex-shrink:0;color:var(--ion);
+}
+.circuit-info{flex:1;min-width:0;}
+.circuit-name{font-weight:600;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.circuit-meta{font-family:var(--f-m);font-size:.72rem;color:var(--ink-dim);margin-top:2px;}
+.circuit-status{flex-shrink:0;}
+
+/* ── Quick-submit panel ── */
+.quick-submit{display:flex;flex-direction:column;gap:14px;padding:20px;}
+.qs-label{font-family:var(--f-m);font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:4px;}
+.qs-input{
+  width:100%;background:var(--paper);border:1.5px solid var(--line);
+  border-radius:10px;padding:10px 13px;font-size:.85rem;
+  outline:none;resize:none;
+  transition:border-color .25s ease,box-shadow .25s ease;
+}
+.qs-input:focus{border-color:var(--ion);box-shadow:0 0 0 3px var(--ion-soft);}
+.qs-row{display:flex;gap:10px;}
+.qs-select{
+  flex:1;background:var(--paper);border:1.5px solid var(--line);
+  border-radius:10px;padding:9px 12px;font-size:.84rem;
+  outline:none;cursor:pointer;
+  transition:border-color .25s ease;
+}
+.qs-select:focus{border-color:var(--ion);}
+
+/* ── Alerts / notifications ── */
+.alert-list{display:flex;flex-direction:column;gap:0;}
+.alert-item{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:14px 20px;border-bottom:1px solid var(--line-soft);
+}
+.alert-item:last-child{border-bottom:none;}
+.alert-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+.alert-dot.green{background:var(--green);}
+.alert-dot.amber{background:var(--amber);}
+.alert-dot.red{background:var(--red);}
+.alert-dot.blue{background:var(--ion);}
+.alert-text{font-size:.84rem;line-height:1.5;flex:1;}
+.alert-time{font-family:var(--f-m);font-size:.7rem;color:var(--ink-dim);flex-shrink:0;padding-top:2px;}
+
+/* ── API key display ── */
+.api-key-row{
+  display:flex;align-items:center;gap:10px;
+  background:var(--paper);border:1.5px solid var(--line);
+  border-radius:10px;padding:11px 14px;
+}
+.api-key-val{font-family:var(--f-m);font-size:.82rem;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-soft);}
+.copy-btn{
+  font-family:var(--f-m);font-size:.72rem;letter-spacing:.04em;
+  background:var(--card);color:var(--ink);
+  border-radius:6px;padding:5px 10px;
+  transition:background .22s ease;
+  flex-shrink:0;
+}
+.copy-btn:hover{background:var(--card-2);}
+
+/* ── Animations ── */
+@keyframes fadeInUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+.animate{animation:fadeInUp .55s var(--ease) both;}
+.d1{animation-delay:.06s;}.d2{animation-delay:.12s;}.d3{animation-delay:.18s;}.d4{animation-delay:.24s;}
+
+@media(max-width:1200px){
+  .stats-row{grid-template-columns:repeat(2,1fr);}
+  .grid-3-1{grid-template-columns:1fr;}
+}
+@media(max-width:900px){
+  .topnav-links{display:none;}
+  .topnav-hamburger{display:flex;}
+  .topnav-search{display:none;}
+  .chip-name{display:none;}
+  .page{padding:20px 16px 24px;}
+  .stats-row{grid-template-columns:repeat(2,1fr);gap:12px;}
+  .grid-2{grid-template-columns:1fr;}
+}
+@media(max-width:480px){
+  .stats-row{grid-template-columns:repeat(2,1fr);}
+  .page{padding:16px 12px 24px;}
+  .topnav{padding:0 14px;}
+  th,td{padding:10px 12px;}
+}
+@media(max-width:380px){.stats-row{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<!-- ═══ TOP NAVBAR ═══ -->
+<nav class="topnav" id="topnav">
+  <div class="container topnav-container">
+    <button class="topnav-hamburger" id="hamburger">
+      <div class="ham-icon"><span></span><span></span><span></span></div>
+    </button>
+    <a href="index.html" class="logo">
+      <img src="img/Logo.webp" alt="Stackly Logo" style="height: 60px; width: auto;">
+    </a>
+    <div class="topnav-links" id="topnavLinks">
+      <div class="nav-item active" onclick="setPage('overview',this)"><span class="nav-icon">⊙</span>Overview</div>
+      <div class="nav-item" onclick="setPage('jobs',this)"><span class="nav-icon">⚡</span>My Jobs<span class="nav-badge">3</span></div>
+      <div class="nav-item" onclick="setPage('circuits',this)"><span class="nav-icon">◈</span>Circuits</div>
+      <div class="nav-item" onclick="setPage('usage',this)"><span class="nav-icon">📊</span>Usage</div>
+      <div class="nav-item" onclick="setPage('apikeys',this)"><span class="nav-icon">🔑</span>API Keys</div>
+      <div class="nav-item" onclick="setPage('billing',this)"><span class="nav-icon">💳</span>Billing</div>
+      <div class="nav-item" onclick="setPage('settings',this)"><span class="nav-icon">⚙</span>Settings</div>
+    </div>
+    <div class="topnav-right">
+      <div class="topnav-search">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="Search circuits, jobs…">
+      </div>
+      <button class="topnav-btn" title="Notifications">🔔<span class="topbar-badge"></span></button>
+      <button class="topnav-btn" title="Help">❓</button>
+      <div class="topnav-chip">
+        <div class="chip-avatar">PR</div>
+        <span class="chip-name">Priya Rao</span>
+      </div>
+    </div>
+  </div>
+</nav>
+<!-- Mobile nav drawer -->
+<div class="topnav-drawer" id="topnavDrawer">
+  <div class="container" style="display:flex; flex-direction:column; gap:2px;">
+    <div class="nav-item active" onclick="setPage('overview',this)"><span class="nav-icon">⊙</span>Overview</div>
+    <div class="nav-item" onclick="setPage('jobs',this)"><span class="nav-icon">⚡</span>My Jobs<span class="nav-badge">3</span></div>
+    <div class="nav-item" onclick="setPage('circuits',this)"><span class="nav-icon">◈</span>Circuits</div>
+    <div class="nav-item" onclick="setPage('usage',this)"><span class="nav-icon">📊</span>Usage</div>
+    <div class="nav-item" onclick="setPage('apikeys',this)"><span class="nav-icon">🔑</span>API Keys</div>
+    <div class="nav-item" onclick="setPage('billing',this)"><span class="nav-icon">💳</span>Billing</div>
+    <div class="nav-item" onclick="setPage('settings',this)"><span class="nav-icon">⚙</span>Settings</div>
+  </div>
+</div>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main-wrap">
+  <!-- ═══ PAGE: OVERVIEW ═══ -->
+  <main class="page">
+    <div class="container" id="pageOverview" style="display:flex; flex-direction:column; gap:24px;">
+
+    <div class="page-header animate">
+      <div>
+        <h1>Good morning, Priya 👋</h1>
+        <p>Here's what's happening with your quantum workloads today.</p>
+      </div>
+      <div class="page-header-actions">
+        <button class="btn btn-ghost btn-sm">📄 Export</button>
+        <button class="btn btn-ion btn-sm" onclick="alert('Submit circuit UI would open here')">+ Submit circuit</button>
+      </div>
+    </div>
+
+    <!-- Stat cards -->
+    <div class="stats-row">
+      <div class="stat-card animate d1">
+        <div class="stat-top">
+          <div class="stat-label">Shots today</div>
+          <div class="stat-icon blue">⚡</div>
+        </div>
+        <div class="stat-num" id="statShots">0</div>
+        <div class="stat-delta up">↑ 12% <span class="stat-delta-label">vs yesterday</span></div>
+        <div>
+          <div class="progress-bar"><div class="progress-fill" style="width:0%" id="shotBar"></div></div>
+          <div style="display:flex;justify-content:space-between;font-family:var(--f-m);font-size:.68rem;color:var(--ink-dim);margin-top:3px;">
+            <span>74 / 100 used</span><span>Free tier</span>
+          </div>
+        </div>
+      </div>
+      <div class="stat-card animate d2">
+        <div class="stat-top">
+          <div class="stat-label">Jobs completed</div>
+          <div class="stat-icon green">✓</div>
+        </div>
+        <div class="stat-num" id="statJobs">0</div>
+        <div class="stat-delta up">↑ 3 <span class="stat-delta-label">since last week</span></div>
+      </div>
+      <div class="stat-card animate d3">
+        <div class="stat-top">
+          <div class="stat-label">Avg. fidelity</div>
+          <div class="stat-icon amber">◎</div>
+        </div>
+        <div class="stat-num" id="statFidelity">0%</div>
+        <div class="stat-delta up">↑ 0.4% <span class="stat-delta-label">this week</span></div>
+      </div>
+      <div class="stat-card animate d4">
+        <div class="stat-top">
+          <div class="stat-label">Active qubits</div>
+          <div class="stat-icon blue">⚛</div>
+        </div>
+        <div class="stat-num" id="statQubits">0</div>
+        <div class="stat-delta">
+          <span class="badge badge-success" style="font-size:.68rem;padding:2px 8px;">All online</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart + usage -->
+    <div class="grid-3-1">
+      <!-- Line chart -->
+      <div class="card animate">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Shot volume — last 7 days</div>
+            <div class="card-subtitle">Compared to prior week</div>
+          </div>
+          <select class="qs-select" style="width:auto;padding:6px 10px;font-size:.78rem;border-radius:8px;">
+            <option>7 days</option><option>30 days</option><option>90 days</option>
+          </select>
+        </div>
+        <div class="chart-area">
+          <svg class="chart-svg" viewBox="0 0 560 180" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#4D5BFF" stop-opacity=".35"/>
+                <stop offset="100%" stop-color="#4D5BFF" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <!-- grid -->
+            <line x1="0" y1="40" x2="560" y2="40" class="chart-grid-line"/>
+            <line x1="0" y1="80" x2="560" y2="80" class="chart-grid-line"/>
+            <line x1="0" y1="120" x2="560" y2="120" class="chart-grid-line"/>
+            <line x1="0" y1="160" x2="560" y2="160" class="chart-grid-line"/>
+            <!-- area fill -->
+            <path class="chart-area-fill" d="M0,140 L80,120 L160,100 L240,80 L320,90 L400,50 L480,60 L560,40 L560,160 L0,160 Z"/>
+            <!-- prior week dashed -->
+            <polyline class="chart-line-2" points="0,155 80,140 160,130 240,110 320,120 400,95 480,100 560,85"/>
+            <!-- this week -->
+            <polyline class="chart-line" points="0,140 80,120 160,100 240,80 320,90 400,50 480,60 560,40"/>
+            <!-- dots -->
+            <circle class="chart-dot" cx="0" cy="140" r="4"/>
+            <circle class="chart-dot" cx="80" cy="120" r="4"/>
+            <circle class="chart-dot" cx="160" cy="100" r="4"/>
+            <circle class="chart-dot" cx="240" cy="80" r="4"/>
+            <circle class="chart-dot" cx="320" cy="90" r="4"/>
+            <circle class="chart-dot" cx="400" cy="50" r="4"/>
+            <circle class="chart-dot" cx="480" cy="60" r="4"/>
+            <circle class="chart-dot" cx="560" cy="40" r="4"/>
+          </svg>
+        </div>
+        <div class="chart-labels">
+          <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span><span>Today</span>
+        </div>
+        <div class="chart-legend">
+          <span><span class="legend-dot legend-ion"></span>This week</span>
+          <span><span class="legend-dot legend-green"></span>Prior week</span>
+        </div>
+      </div>
+
+      <!-- Usage ring -->
+      <div class="card animate">
+        <div class="card-header">
+          <div class="card-title">Plan usage</div>
+        </div>
+        <div class="usage-ring-wrap">
+          <svg class="usage-ring-svg" viewBox="0 0 140 140">
+            <circle class="ring-track" cx="70" cy="70" r="57"/>
+            <circle class="ring-fill" cx="70" cy="70" r="57" id="usageRing"
+              style="stroke-dasharray:358.1; stroke-dashoffset:358.1;"/>
+            <text x="70" y="66" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="18" font-weight="600" fill="#121212">74%</text>
+            <text x="70" y="82" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#8C8A84">74 / 100 shots</text>
+          </svg>
+          <div class="usage-labels">
+            <div class="usage-label-row">
+              <div class="usage-label-left"><span class="usage-label-dot" style="background:var(--ion)"></span>Shots used</div>
+              <span class="usage-label-val">74</span>
+            </div>
+            <div class="usage-label-row">
+              <div class="usage-label-left"><span class="usage-label-dot" style="background:var(--card-2)"></span>Remaining</div>
+              <span class="usage-label-val">26</span>
+            </div>
+            <div class="usage-label-row">
+              <div class="usage-label-left"><span class="usage-label-dot" style="background:var(--green)"></span>Reset in</div>
+              <span class="usage-label-val">6h 22m</span>
+            </div>
+          </div>
+          <a href="#" class="btn btn-ion" style="width:100%;justify-content:center;font-size:.82rem;">Upgrade plan →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Job queue + circuits -->
+    <div class="grid-2">
+      <!-- Job queue table -->
+      <div class="card animate">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Live job queue</div>
+            <div class="card-subtitle">3 active · 2 pending</div>
+          </div>
+          <button class="btn btn-ghost btn-sm">View all</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Job ID</th><th>Circuit</th><th>Shots</th><th>Status</th><th>Time</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="td-mono">JB-0841</td>
+                <td class="td-name">VQE · H₂O</td>
+                <td class="td-mono">1,024</td>
+                <td><span class="badge badge-success"><span class="badge-dot"></span>Done</span></td>
+                <td class="td-mono" style="color:var(--ink-dim)">2m ago</td>
+              </tr>
+              <tr>
+                <td class="td-mono">JB-0842</td>
+                <td class="td-name">QAOA · Graph</td>
+                <td class="td-mono">512</td>
+                <td><span class="badge badge-info"><span class="badge-dot"></span>Running</span></td>
+                <td class="td-mono" style="color:var(--ink-dim)">Now</td>
+              </tr>
+              <tr>
+                <td class="td-mono">JB-0843</td>
+                <td class="td-name">Bell test</td>
+                <td class="td-mono">256</td>
+                <td><span class="badge badge-warn"><span class="badge-dot"></span>Queued</span></td>
+                <td class="td-mono" style="color:var(--ink-dim)">~45s</td>
+              </tr>
+              <tr>
+                <td class="td-mono">JB-0844</td>
+                <td class="td-name">Grover 4q</td>
+                <td class="td-mono">2,048</td>
+                <td><span class="badge badge-warn"><span class="badge-dot"></span>Queued</span></td>
+                <td class="td-mono" style="color:var(--ink-dim)">~2m</td>
+              </tr>
+              <tr>
+                <td class="td-mono">JB-0838</td>
+                <td class="td-name">QFT test</td>
+                <td class="td-mono">128</td>
+                <td><span class="badge badge-error"><span class="badge-dot"></span>Error</span></td>
+                <td class="td-mono" style="color:var(--ink-dim)">18m ago</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Right col: notifications + quick submit -->
+      <div style="display:flex;flex-direction:column;gap:20px;">
+
+        <!-- Notifications -->
+        <div class="card animate">
+          <div class="card-header">
+            <div class="card-title">Notifications</div>
+            <button class="btn btn-ghost btn-sm">Mark all read</button>
+          </div>
+          <div class="alert-list">
+            <div class="alert-item">
+              <div class="alert-dot green"></div>
+              <div class="alert-text">Job JB-0841 (VQE · H₂O) completed with 99.4% fidelity. Results ready to download.</div>
+              <div class="alert-time">2m</div>
+            </div>
+            <div class="alert-item">
+              <div class="alert-dot amber"></div>
+              <div class="alert-text">You've used 74% of your daily shot allocation. Resets at midnight IST.</div>
+              <div class="alert-time">1h</div>
+            </div>
+            <div class="alert-item">
+              <div class="alert-dot blue"></div>
+              <div class="alert-text">Platform update: new batch job API is live. Up to 1,000 circuits per call.</div>
+              <div class="alert-time">3h</div>
+            </div>
+            <div class="alert-item">
+              <div class="alert-dot red"></div>
+              <div class="alert-text">Job JB-0838 (QFT test) failed due to qubit decoherence mid-circuit. Try resubmitting with fewer gates.</div>
+              <div class="alert-time">18m</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick submit -->
+        <div class="card animate">
+          <div class="card-header"><div class="card-title">Quick submit</div></div>
+          <div class="quick-submit">
+            <div>
+              <div class="qs-label">Circuit (QASM or JSON)</div>
+              <textarea class="qs-input" rows="4" placeholder="OPENQASM 2.0;&#10;include &quot;qelib1.inc&quot;;&#10;qreg q[2];&#10;h q[0];&#10;cx q[0],q[1];&#10;measure q -> c;"></textarea>
+            </div>
+            <div class="qs-row">
+              <div style="flex:1">
+                <div class="qs-label">Shots</div>
+                <input type="number" class="qs-input" value="1024" min="1" max="100">
+              </div>
+              <div style="flex:1">
+                <div class="qs-label">Backend</div>
+                <select class="qs-select">
+                  <option>stackly-128q</option>
+                  <option>stackly-27q</option>
+                  <option>simulator</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn btn-ion" style="width:100%;justify-content:center;" onclick="submitJob()">Submit job →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent circuits -->
+    <div class="card animate">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Recent circuits</div>
+          <div class="card-subtitle">Last saved and submitted</div>
+        </div>
+        <button class="btn btn-ghost btn-sm">View all circuits</button>
+      </div>
+      <div class="circuit-list">
+        <div class="circuit-item">
+          <div class="circuit-icon">⚗</div>
+          <div class="circuit-info">
+            <div class="circuit-name">VQE — Water molecule (H₂O)</div>
+            <div class="circuit-meta">12 qubits · 48 gates · last run 2min ago</div>
+          </div>
+          <span class="badge badge-success circuit-status"><span class="badge-dot"></span>Done</span>
+        </div>
+        <div class="circuit-item">
+          <div class="circuit-icon">⟡</div>
+          <div class="circuit-info">
+            <div class="circuit-name">QAOA — Max-cut Graph 8 nodes</div>
+            <div class="circuit-meta">8 qubits · 64 gates · last run 1h ago</div>
+          </div>
+          <span class="badge badge-info circuit-status"><span class="badge-dot"></span>Running</span>
+        </div>
+        <div class="circuit-item">
+          <div class="circuit-icon">◈</div>
+          <div class="circuit-info">
+            <div class="circuit-name">Bell state preparation</div>
+            <div class="circuit-meta">2 qubits · 2 gates · last run 3h ago</div>
+          </div>
+          <span class="badge badge-success circuit-status"><span class="badge-dot"></span>Done</span>
+        </div>
+        <div class="circuit-item">
+          <div class="circuit-icon">❄</div>
+          <div class="circuit-info">
+            <div class="circuit-name">Grover search — 4 qubits</div>
+            <div class="circuit-meta">4 qubits · 22 gates · queued</div>
+          </div>
+          <span class="badge badge-warn circuit-status"><span class="badge-dot"></span>Queued</span>
+        </div>
+        <div class="circuit-item">
+          <div class="circuit-icon">⊛</div>
+          <div class="circuit-info">
+            <div class="circuit-name">QFT — 8-qubit test</div>
+            <div class="circuit-meta">8 qubits · 56 gates · failed</div>
+          </div>
+          <span class="badge badge-error circuit-status"><span class="badge-dot"></span>Error</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- API key -->
+    <div class="card animate">
+      <div class="card-header">
+        <div class="card-title">API key</div>
+        <button class="btn btn-ghost btn-sm" onclick="alert('New key generated (demo)')">Regenerate</button>
+      </div>
+      <div class="card-body">
+        <div class="qs-label" style="margin-bottom:8px;">Active key — created Jun 1, 2026</div>
+        <div class="api-key-row">
+          <span class="api-key-val" id="apiKeyVal">stk_live_••••••••••••••••••••••••••••••••</span>
+          <button class="copy-btn" onclick="toggleApiKey(this)">Reveal</button>
+          <button class="copy-btn" onclick="copyApiKey()">Copy</button>
+        </div>
+        <div style="margin-top:12px;font-size:.8rem;color:var(--ink-dim);">
+          Never share your API key publicly. It grants full access to your Stackly account.
+        </div>
+      </div>
+    </div>
+
+    </div><!-- /container -->
+  </main>
+
+  <!-- ═══ FOOTER ═══ -->
+  <footer class="dashboard-footer">
+    <div class="container footer-inner">
+      <span>© 2026 Stackly Quantum Systems. All rights reserved.</span>
+      <div class="footer-links">
+        <a href="about.html">About</a>
+        <a href="service.html">Services</a>
+        <a href="blog.html">Blog</a>
+        <a href="contact.html">Contact</a>
+      </div>
+    </div>
+  </footer>
+
+</div><!-- /main-wrap -->
+
+<script>
+/* ── Topnav hamburger (mobile) ── */
+const hamburger = document.getElementById('hamburger');
+const drawer = document.getElementById('topnavDrawer');
+hamburger.addEventListener('click', () => { drawer.classList.toggle('open'); });
+document.addEventListener('click', e => {
+  if(!hamburger.contains(e.target) && !drawer.contains(e.target)) drawer.classList.remove('open');
+});
+
+/* ── Page navigation ── */
+function setPage(page, navEl) {
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  if(navEl) {
+    // highlight the clicked item and its twin in the other nav list
+    const pageKey = navEl.getAttribute('onclick')?.match(/'(\w+)'/)?.[1];
+    document.querySelectorAll('.nav-item').forEach(el => {
+      if(el.getAttribute('onclick')?.includes(`'${pageKey}'`)) el.classList.add('active');
+    });
+  }
+  drawer.classList.remove('open');
+}
+
+/* ── Animated counters ── */
+function animateVal(id, target, suffix='', dur=1200) {
+  const el = document.getElementById(id);
+  if(!el) return;
+  const start = performance.now();
+  const tick = now => {
+    const p = Math.min((now-start)/dur,1), e = 1-Math.pow(1-p,3);
+    el.textContent = (Number.isInteger(target) ? Math.round(target*e) : (target*e).toFixed(1)) + suffix;
+    if(p<1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+/* ── Progress bar animate ── */
+function animateBar(id, pct, dur=1200) {
+  const el = document.getElementById(id);
+  if(!el) return;
+  setTimeout(()=>{ el.style.width = pct+'%'; }, 100);
+}
+
+/* ── Ring animate ── */
+function animateRing(id, pct, r=57) {
+  const el = document.getElementById(id);
+  if(!el) return;
+  const circ = 2*Math.PI*r;
+  setTimeout(()=>{
+    el.style.strokeDasharray = circ;
+    el.style.strokeDashoffset = circ*(1-pct/100);
+  }, 200);
+}
+
+/* ── Init animations ── */
+window.addEventListener('DOMContentLoaded', () => {
+  setTimeout(()=>{
+    animateVal('statShots', 74);
+    animateVal('statJobs', 31);
+    animateVal('statFidelity', 99.4, '%');
+    animateVal('statQubits', 128);
+    animateBar('shotBar', 74);
+    animateRing('usageRing', 74);
+  }, 300);
+});
+
+/* ── Submit job demo ── */
+function submitJob() {
+  const btn = document.querySelector('.quick-submit .btn-ion');
+  btn.textContent = 'Submitting…';
+  btn.disabled = true;
+  setTimeout(()=>{ btn.textContent = '✓ Job submitted'; setTimeout(()=>{ btn.textContent='Submit job →'; btn.disabled=false; },2000); }, 1500);
+}
+
+/* ── API key ── */
+const realKey = 'stk_live_4K9mP2xQrNzYh8wJdVbLcTe6sUoGfAiX';
+let revealed = false;
+function toggleApiKey(btn) {
+  revealed = !revealed;
+  document.getElementById('apiKeyVal').textContent = revealed ? realKey : 'stk_live_••••••••••••••••••••••••••••••••';
+  btn.textContent = revealed ? 'Hide' : 'Reveal';
+}
+function copyApiKey() {
+  navigator.clipboard?.writeText(realKey).catch(()=>{});
+  const btn = document.querySelectorAll('.copy-btn')[1];
+  btn.textContent = 'Copied!';
+  setTimeout(()=>btn.textContent='Copy', 1500);
+}
+
+/* ── Live clock simulation for "running" job ── */
+let elapsed = 0;
+setInterval(()=>{
+  elapsed++;
+  const cells = document.querySelectorAll('td.td-mono');
+  // update "Now" display
+}, 1000);
+</script>
+</body>
+</html>

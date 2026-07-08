@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About Us — Stackly Quantum Computing</title>
+<meta name="description" content="Meet the team of physicists and engineers at Stackly building cryogenics, control stacks, compilers, and hardware-aware quantum APIs.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="pages.css">
+<style>
+/* nav override */
+.nav{
+  position:sticky; top:0;
+  background:rgba(0,0,0,0.5);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  color:#fff;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+  padding:14px clamp(20px,5.5vw,64px);
+  z-index: 100;
+}
+.nav-links{ color:rgba(255,255,255,0.7); }
+.nav-links a{ color:inherit; }
+.nav-links a:hover{ opacity:1; color:#fff; }
+.nav-sep{ color:rgba(255,255,255,0.3); }
+.nav-social a{ color:#fff; }
+.nav-social a:hover{ opacity:1; color:var(--ion); }
+.hamburger span{ background:#fff; }
+</style>
+</head>
+<body>
+
+<!-- ============ PRELOADER ============ -->
+<div class="preloader" id="preloader">
+
+  <!-- Layer 1: Deep space particle canvas -->
+  <canvas id="plCanvas"></canvas>
+
+  <!-- Layer 2: Quantum circuit grid overlay -->
+  <div class="pl-grid"></div>
+
+  <!-- Layer 3: Bloch sphere canvas (main centrepiece) -->
+  <div class="pl-sphere-wrap">
+    <canvas id="plSphere" width="320" height="320"></canvas>
+    <div class="pl-sphere-ring pl-ring-1"></div>
+    <div class="pl-sphere-ring pl-ring-2"></div>
+    <div class="pl-sphere-ring pl-ring-3"></div>
+  </div>
+
+  <!-- Layer 4: Scan-line overlay -->
+  <div class="pl-scanline"></div>
+
+  <!-- Layer 5: Top-left corner HUD -->
+  <div class="pl-hud pl-hud-tl">
+    <span class="pl-hud-label">SYS</span>
+    <span class="pl-hud-val" id="plSysVal">BOOT</span>
+  </div>
+  <div class="pl-hud pl-hud-tr">
+    <span class="pl-hud-label">TEMP</span>
+    <span class="pl-hud-val" id="plTemp">15mK</span>
+  </div>
+  <div class="pl-hud pl-hud-bl">
+    <span class="pl-hud-label">QUBITS</span>
+    <span class="pl-hud-val" id="plQubits">000/128</span>
+  </div>
+  <div class="pl-hud pl-hud-br">
+    <span class="pl-hud-label">FIDELITY</span>
+    <span class="pl-hud-val" id="plFidelity">—</span>
+  </div>
+
+  <!-- Layer 6: Centre UI -->
+  <div class="pl-center">
+    <div class="pl-brand">
+      <div class="pl-brand-line"></div>
+      <span class="pl-brand-word" id="plBrandWord">STACKLY</span>
+      <div class="pl-brand-line"></div>
+    </div>
+    <div class="pl-status-wrap">
+      <span class="pl-cursor">▌</span>
+      <span class="pl-status" id="plStatus">INITIALIZING QUANTUM SYSTEM</span>
+    </div>
+    <div class="pl-progress-outer">
+      <div class="pl-progress-track">
+        <div class="pl-progress-fill" id="plFill"></div>
+        <div class="pl-progress-glow" id="plGlow"></div>
+      </div>
+      <span class="pl-pct" id="plPct">0%</span>
+    </div>
+    <div class="pl-braket" id="plBraket">|Ψ⟩ = α|0⟩ + β|1⟩</div>
+  </div>
+
+  <!-- Layer 7: Binary rain columns -->
+  <canvas id="plRain"></canvas>
+
+</div>
+
+<div class="grain"></div>
+<div class="mobile-menu-backdrop" id="mobileMenuBackdrop"></div>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html">Home</a>
+  <a href="service.html">Services</a>
+  <a href="about.html">About</a>
+  <a href="blog.html">Blog</a>
+  <a href="contact.html">Contact</a>
+  <a href="login.html" class="btn btn-dark" style="margin-top:8px;">Login →</a>
+</div>
+
+<!-- ============ 1. NAV ============ -->
+<header class="nav" id="nav">
+  <a href="index.html" class="logo">
+    <img src="img/Logo.webp" alt="Stackly Logo" style="height:72px;width:auto;">
+  </a>
+  <nav class="nav-links">
+    <a href="index.html">Home</a><span class="nav-sep">/</span>
+    <a href="service.html">Services</a><span class="nav-sep">/</span>
+    <a href="about.html">About</a><span class="nav-sep">/</span>
+    <a href="blog.html">Blog</a><span class="nav-sep">/</span>
+    <a href="contact.html">Contact</a>
+  </nav>
+  <div class="nav-right">
+    <div class="nav-social">
+      <a href="#">f</a><a href="#">𝕏</a><a href="#">in</a>
+    </div>
+    <a href="login.html" class="btn btn-dark nav-cta">Login <span class="arrow">→</span></a>
+  </div>
+  <button class="hamburger" id="hamburger" aria-label="Toggle menu"><span></span><span></span></button>
+</header>
+
+<!-- ============ 2. PAGE HERO ============ -->
+<div class="page-hero">
+  <img src="img/office.webp" alt="Stackly Offices" class="page-hero-img">
+  <div class="page-hero-scrim"></div>
+  <div class="page-hero-inner">
+    <p class="eyebrow reveal-up">/ Who We Are /</p>
+    <h1 class="page-hero-title reveal-left">Building the hardware.<br>Writing the compiler.</h1>
+    <p class="page-hero-sub reveal-up" style="--d:0.1s">We are a team of physicists, electronics engineers, and compiler developers unifying the stack to deliver quantum computational advantage.</p>
+  </div>
+</div>
+
+<!-- ============ 3. MISSION SPLIT ============ -->
+<section style="padding:100px var(--pad) 80px;">
+  <div class="alt-row reveal-up">
+    <div class="alt-img">
+      <img src="img/cleanroom.webp" alt="Cleanroom environment assembly">
+      <span class="alt-img-badge">Laboratory</span>
+    </div>
+    <div class="alt-copy">
+      <p class="eyebrow" style="color:var(--ion)">/ Mission /</p>
+      <h3>Vertical system integration is the only path.</h3>
+      <p>Superconducting qubits are highly sensitive to external fields, microwave calibration drifts, and compilation overheads. We believe scaling can only be achieved by building the dilution refrigerators, custom microwave control chips, error compilers, and remote cloud layers under one roof.</p>
+      <ul class="alt-list">
+        <li>Superconducting chip fabrication in-house</li>
+        <li>Custom control electronics built for low temperature</li>
+        <li>Open API integrations with standard SDK libraries</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 4. MILESTONES TIMELINE ============ -->
+<section style="padding:40px var(--pad) 100px;">
+  <div class="section-eyebrow-center reveal-up">
+    <p class="eyebrow">/ Company Timeline /</p>
+    <h2 class="section-title">Our trajectory.</h2>
+  </div>
+   <div class="timeline-wrap">
+    <div class="timeline-item reveal-up" style="--d: 0.1s;">
+      <div class="timeline-dot"></div>
+      <span class="timeline-year">2022</span>
+      <h3>16-Qubit Cryostat Prototype</h3>
+      <p>Demonstrated our first closed-loop dilution refrigerator operating at 15mK with microwave control lines mapping 16 superconducting qubits. Achieved 98.4% single-gate fidelity.</p>
+    </div>
+    <div class="timeline-item reveal-up" style="--d: 0.2s;">
+      <div class="timeline-dot"></div>
+      <span class="timeline-year">2023</span>
+      <h3>Cloud Access and SDK Integrations</h3>
+      <p>Opened REST APIs to active academic researchers and integrated our compiler routing directly into Qiskit. Scaled chip size to 64 physical qubits.</p>
+    </div>
+    <div class="timeline-item reveal-up" style="--d: 0.3s;">
+      <div class="timeline-dot"></div>
+      <span class="timeline-year">2025</span>
+      <h3>General Availability of 128-Qubit Platform</h3>
+      <p>Released the General Availability tier of our 128-qubit hardware platform with 24/7 telemetry monitoring and pulse-level microwave microwave controls.</p>
+    </div>
+    <div class="timeline-item reveal-up" style="--d: 0.4s;">
+      <div class="timeline-dot"></div>
+      <span class="timeline-year">2027 (Vision)</span>
+      <h3>Fault-Tolerant Logical Qubits</h3>
+      <p>Implement surface code error correction across logical clusters on a 1 000-qubit processor framework to deliver scale advantage for materials physics.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5. STATS TICKER ROW ============ -->
+<section style="padding:80px var(--pad) 100px; background:var(--card);">
+  <div class="section-eyebrow-center reveal-up">
+    <p class="eyebrow">/ Platform Metrics /</p>
+    <h2 class="section-title">Stackly in numbers.</h2>
+  </div>
+
+  <div class="ticker-row reveal-up">
+    <div class="ticker-cell">
+      <span class="ticker-num" data-count="128" data-suffix="">0</span>
+      <span class="ticker-label">Active Coherent Qubits</span>
+    </div>
+    <div class="ticker-cell">
+      <span class="ticker-num" data-count="99.8" data-suffix="%">0</span>
+      <span class="ticker-label">One-Qubit Gate Fidelity</span>
+    </div>
+    <div class="ticker-cell">
+      <span class="ticker-num" data-count="15" data-suffix="mK">0</span>
+      <span class="ticker-label">Refrigerator Mixing Temp</span>
+    </div>
+    <div class="ticker-cell">
+      <span class="ticker-num" data-count="3" data-suffix="">0</span>
+      <span class="ticker-label">Global R&D Lab Hubs</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6. CORPORATE VALUES ============ -->
+<section style="padding:100px var(--pad) 80px;">
+  <div class="section-eyebrow-center reveal-up">
+    <p class="eyebrow">/ Corporate Philosophy /</p>
+    <h2 class="section-title">Our values.</h2>
+  </div>
+
+  <div class="values-grid">
+    <div class="value-card reveal-up" style="--d:0.05s">
+      <span class="value-num">01.</span>
+      <span class="value-icon">⚖</span>
+      <h3>Co-Design Philosophy</h3>
+      <p>We do not optimize hardware in isolation. Our compiler developers sit adjacent to our cryo-electronics engineers to align layout rules and compile metrics.</p>
+    </div>
+    <div class="value-card reveal-up" style="--d:0.1s">
+      <span class="value-num">02.</span>
+      <span class="value-icon">🔓</span>
+      <h3>Scientific Openness</h3>
+      <p>We actively publish calibrations, error statistics, and hardware models. We support open source libraries and prioritize academic collaborations.</p>
+    </div>
+    <div class="value-card reveal-up" style="--d:0.15s">
+      <span class="value-num">03.</span>
+      <span class="value-icon">🔬</span>
+      <h3>Extreme Precision</h3>
+      <p>In the quantum domain, microscopic temperature shifts or sub-nano-degree phase offsets destroy computation. We operate with strict system tolerances.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 7. INTERACTIVE TEAM GRID ============ -->
+<section style="padding:40px var(--pad) 100px;">
+  <div class="section-eyebrow-center reveal-up">
+    <p class="eyebrow">/ Team /</p>
+    <h2 class="section-title">Meet the founders and engineers.</h2>
+    <p class="section-sub">A team from IISc, Oxford, and industry combining expertise across quantum physics, cryogenics, and software compilers.</p>
+  </div>
+
+  <!-- Filter tabs -->
+  <div class="filter-tabs reveal-up" data-target="#teamGrid">
+    <button class="filter-tab active" data-filter="all" data-target="#teamGrid">All Team</button>
+    <button class="filter-tab" data-filter="hardware" data-target="#teamGrid">Hardware</button>
+    <button class="filter-tab" data-filter="software" data-target="#teamGrid">Software</button>
+    <button class="filter-tab" data-filter="research" data-target="#teamGrid">Research</button>
+  </div>
+
+  <div class="team-grid" id="teamGrid">
+    <div class="team-card filter-item reveal-up" data-category="research" style="--d:0.05s">
+      <div class="team-avatar">
+        <img src="img/engineer.webp" alt="Dr. Sophie Varma">
+        <div class="team-avatar-overlay">
+          <a href="#">Bio profile ↗</a>
+        </div>
+      </div>
+      <div class="team-name">Dr. Sophie Varma</div>
+      <div class="team-role">CEO & Co-Founder (Quantum ML)</div>
+      <div class="team-social">
+        <a href="#">in</a><a href="#">𝕏</a>
+      </div>
+    </div>
+
+    <div class="team-card filter-item reveal-up" data-category="hardware" style="--d:0.1s">
+      <div class="team-avatar">
+        <img src="img/lab_team.webp" alt="Marcus Chen">
+        <div class="team-avatar-overlay">
+          <a href="#">Bio profile ↗</a>
+        </div>
+      </div>
+      <div class="team-name">Marcus Chen</div>
+      <div class="team-role">Chief Hardware Architect</div>
+      <div class="team-social">
+        <a href="#">in</a><a href="#">𝕏</a>
+      </div>
+    </div>
+
+    <div class="team-card filter-item reveal-up" data-category="software" style="--d:0.15s">
+      <div class="team-avatar">
+        <img src="img/monitoring.webp" alt="Dr. John Doe">
+        <div class="team-avatar-overlay">
+          <a href="#">Bio profile ↗</a>
+        </div>
+      </div>
+      <div class="team-name">Dr. John Doe</div>
+      <div class="team-role">Compiler Lead</div>
+      <div class="team-social">
+        <a href="#">in</a><a href="#">𝕏</a>
+      </div>
+    </div>
+
+    <div class="team-card filter-item reveal-up" data-category="research" style="--d:0.2s">
+      <div class="team-avatar">
+        <img src="img/research.webp" alt="Dr. Priya Rao">
+        <div class="team-avatar-overlay">
+          <a href="#">Bio profile ↗</a>
+        </div>
+      </div>
+      <div class="team-name">Dr. Priya Rao</div>
+      <div class="team-role">Theoretical Physicist</div>
+      <div class="team-social">
+        <a href="#">in</a><a href="#">𝕏</a>
+      </div>
+    </div>
+
+    <div class="team-card filter-item reveal-up" data-category="hardware" style="--d:0.25s">
+      <div class="team-avatar">
+        <img src="img/board.webp" alt="Nikolai Petrov">
+        <div class="team-avatar-overlay">
+          <a href="#">Bio profile ↗</a>
+        </div>
+      </div>
+      <div class="team-name">Nikolai Petrov</div>
+      <div class="team-role">Cryogenics Lead</div>
+      <div class="team-social">
+        <a href="#">in</a><a href="#">𝕏</a>
+      </div>
+    </div>
+
+    <div class="team-card filter-item reveal-up" data-category="software" style="--d:0.3s">
+      <div class="team-avatar">
+        <img src="img/circuit.webp" alt="Sarah Jenkins">
+        <div class="team-avatar-overlay">
+          <a href="#">Bio profile ↗</a>
+        </div>
+      </div>
+      <div class="team-name">Sarah Jenkins</div>
+      <div class="team-role">Developer Advocate</div>
+      <div class="team-social">
+        <a href="#">in</a><a href="#">𝕏</a>
+      </div>
+    </div>
+
+    <div class="team-card filter-item reveal-up" data-category="software" style="--d:0.35s">
+      <div class="team-avatar">
+        <img src="img/data_dashboard.webp" alt="Amit Patel">
+        <div class="team-avatar-overlay">
+          <a href="#">Bio profile ↗</a>
+        </div>
+      </div>
+      <div class="team-name">Amit Patel</div>
+      <div class="team-role">Platform Product Lead</div>
+      <div class="team-social">
+        <a href="#">in</a><a href="#">𝕏</a>
+      </div>
+    </div>
+
+    <div class="team-card filter-item reveal-up" data-category="research" style="--d:0.4s">
+      <div class="team-avatar">
+        <img src="img/cleanroom.webp" alt="Dr. Lin Ye">
+        <div class="team-avatar-overlay">
+          <a href="#">Bio profile ↗</a>
+        </div>
+      </div>
+      <div class="team-name">Dr. Lin Ye</div>
+      <div class="team-role">Quantum Error Mitigation Lead</div>
+      <div class="team-social">
+        <a href="#">in</a><a href="#">𝕏</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 8. OFFICE LAB LOCATIONS ============ -->
+<section style="padding:0 var(--pad) 100px;">
+  <div class="section-eyebrow-center reveal-up">
+    <p class="eyebrow">/ Facilities /</p>
+    <h2 class="section-title">Global operations.</h2>
+  </div>
+
+  <div class="offices-grid">
+    <div class="office-card reveal-up" style="--d:0.05s">
+      <div class="office-flag">🇮🇳</div>
+      <div class="office-city">Salem, India</div>
+      <div class="office-addr">HQ, Chip Fabrication & dilution refrigerator physics laboratory.</div>
+      <span class="office-badge">Main R&D Lab</span>
+    </div>
+    <div class="office-card reveal-up" style="--d:0.1s">
+      <div class="office-flag">🇮🇳</div>
+      <div class="office-city">Bengaluru, India</div>
+      <div class="office-addr">Compiler design, cloud stack engineering, and API integration teams.</div>
+      <span class="office-badge">Software Lab</span>
+    </div>
+    <div class="office-card reveal-up" style="--d:0.15s">
+      <div class="office-flag">🇸🇬</div>
+      <div class="office-city">Singapore</div>
+      <div class="office-addr">APAC regional operations, research partnerships, and business development.</div>
+      <span class="office-badge">Operations Hub</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 9. CAREERS CTA BLOCK ============ -->
+<section class="cta-photo" style="padding:0 var(--pad) 100px;">
+  <div class="cta-frame">
+    <img src="img/drivelines.webp" alt="Microwave drivelines" class="cta-img">
+    <div class="cta-scrim"></div>
+    <div class="cta-content">
+      <p class="eyebrow light reveal-up">/ Careers /</p>
+      <h2 class="cta-title reveal-up">Write assembly for cold processors.</h2>
+      <p class="cta-sub reveal-up" style="--d:0.1s">We are actively hiring quantum control specialists, transpiler optimization developers, and compiler engineers. Join our labs in Salem or Bengaluru.</p>
+      <a href="contact.html" class="btn btn-light reveal-up" style="--d:0.2s">Explore Open Roles <span class="arrow">→</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a href="index.html" class="logo">
+        <img src="img/Logo.webp" alt="Stackly Logo" style="height: 60px; width: auto;">
+      </a>
+      <p>Quantum processors, control systems, and software, engineered as one stack.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <a href="service.html">Services</a>
+      <a href="about.html">About</a>
+      <a href="blog.html">Blog</a>
+      <a href="contact.html">Contact</a>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <a href="tel:+919876543210">+91 98765 43210</a>
+      <span>Salem, Tamil Nadu, India</span>
+      <a href="mailto:hello@stackly.com">hello@stackly.com</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Stackly Quantum Systems. All rights reserved.</span>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

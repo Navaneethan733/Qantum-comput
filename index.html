@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stackly — Quantum Computing Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ============ PRELOADER ============ -->
+<div class="preloader" id="preloader">
+
+  <!-- Layer 1: Deep space particle canvas -->
+  <canvas id="plCanvas"></canvas>
+
+  <!-- Layer 2: Quantum circuit grid overlay -->
+  <div class="pl-grid"></div>
+
+  <!-- Layer 3: Bloch sphere canvas (main centrepiece) -->
+  <div class="pl-sphere-wrap">
+    <canvas id="plSphere" width="320" height="320"></canvas>
+    <div class="pl-sphere-ring pl-ring-1"></div>
+    <div class="pl-sphere-ring pl-ring-2"></div>
+    <div class="pl-sphere-ring pl-ring-3"></div>
+  </div>
+
+  <!-- Layer 4: Scan-line overlay -->
+  <div class="pl-scanline"></div>
+
+  <!-- Layer 5: Top-left corner HUD -->
+  <div class="pl-hud pl-hud-tl">
+    <span class="pl-hud-label">SYS</span>
+    <span class="pl-hud-val" id="plSysVal">BOOT</span>
+  </div>
+  <div class="pl-hud pl-hud-tr">
+    <span class="pl-hud-label">TEMP</span>
+    <span class="pl-hud-val" id="plTemp">15mK</span>
+  </div>
+  <div class="pl-hud pl-hud-bl">
+    <span class="pl-hud-label">QUBITS</span>
+    <span class="pl-hud-val" id="plQubits">000/128</span>
+  </div>
+  <div class="pl-hud pl-hud-br">
+    <span class="pl-hud-label">FIDELITY</span>
+    <span class="pl-hud-val" id="plFidelity">—</span>
+  </div>
+
+  <!-- Layer 6: Centre UI -->
+  <div class="pl-center">
+    <div class="pl-brand">
+      <div class="pl-brand-line"></div>
+      <span class="pl-brand-word" id="plBrandWord">STACKLY</span>
+      <div class="pl-brand-line"></div>
+    </div>
+    <div class="pl-status-wrap">
+      <span class="pl-cursor">▌</span>
+      <span class="pl-status" id="plStatus">INITIALIZING QUANTUM SYSTEM</span>
+    </div>
+    <div class="pl-progress-outer">
+      <div class="pl-progress-track">
+        <div class="pl-progress-fill" id="plFill"></div>
+        <div class="pl-progress-glow" id="plGlow"></div>
+      </div>
+      <span class="pl-pct" id="plPct">0%</span>
+    </div>
+    <div class="pl-braket" id="plBraket">|Ψ⟩ = α|0⟩ + β|1⟩</div>
+  </div>
+
+  <!-- Layer 7: Binary rain columns -->
+  <canvas id="plRain"></canvas>
+
+</div>
+
+<div class="grain"></div>
+
+<div class="mobile-menu-backdrop" id="mobileMenuBackdrop"></div>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html">Home</a>
+  <a href="service.html">Services</a>
+  <a href="about.html">About</a>
+  <a href="blog.html">Blog</a>
+  <a href="contact.html">Contact</a>
+  <a href="login.html" class="btn btn-dark" style="margin-top:8px;">Login →</a>
+</div>
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="top">
+  <div class="hero-frame">
+    <!-- ============ NAV ============ -->
+    <header class="nav" id="nav">
+      <a href="index.html" class="logo">
+        <img src="img/Logo.webp" alt="Stackly Logo" style="height: 72px; width: auto;">
+      </a>
+
+      <nav class="nav-links">
+        <a href="index.html">Home</a><span class="nav-sep">/</span>
+        <a href="service.html">Services</a><span class="nav-sep">/</span>
+        <a href="about.html">About</a><span class="nav-sep">/</span>
+        <a href="blog.html">Blog</a><span class="nav-sep">/</span>
+        <a href="contact.html">Contact</a>
+      </nav>
+
+      <div class="nav-right">
+        <a href="login.html" class="btn btn-light nav-cta">Login <span class="arrow">→</span></a>
+      </div>
+
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+        <span></span><span></span>
+      </button>
+    </header>
+
+    <div class="hero-slideshow" id="heroSlideshow">
+      <div class="hero-slide active"><img src="img/hero1.webp" alt="Hero slide 1"></div>
+      <div class="hero-slide"><img src="img/hero2.webp" alt="Hero slide 2"></div>
+      <div class="hero-slide"><img src="img/hero3.webp" alt="Hero slide 3"></div>
+    </div>
+    <div class="hero-slide-dots" id="heroSlideDots">
+      <button class="hero-slide-dot active" data-index="0" aria-label="Slide 1"></button>
+      <button class="hero-slide-dot" data-index="1" aria-label="Slide 2"></button>
+      <button class="hero-slide-dot" data-index="2" aria-label="Slide 3"></button>
+    </div>
+    <div class="hero-scrim"></div>
+
+    <div class="hero-content">
+      <h1 class="hero-title">
+        <span class="line" data-split>Transform your</span>
+        <span class="line" data-split>operations with</span>
+        <span class="line" data-split>Neuralflow's AI.</span>
+      </h1>
+      <p class="hero-sub reveal-up" style="--d:0.15s">
+        Lorem ipsum dolor sit amet consectetur quam nisl auctor amet
+        pellentesque euismod scelerisque condimentum arcu sed imperdiet
+        viverra vel scelerisque eu lectus aenean vestibulum egestas nunc.
+      </p>
+      <div class="hero-actions reveal-up" style="--d:0.25s">
+        <a href="#platform" class="btn btn-light">Explore solutions <span class="arrow">→</span></a>
+        <a href="#contact" class="btn btn-outline-light">Contact us</a>
+      </div>
+    </div>
+
+    <div class="hero-stats reveal-up" style="--d:0.35s">
+      <div class="stat">
+        <span class="stat-label">Companies using Neuralflow</span>
+        <span class="stat-num" data-count="10" data-suffix="K+">0</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Customer satisfaction</span>
+        <span class="stat-num" data-count="99.8" data-suffix="%">0</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Faster decision-making</span>
+        <span class="stat-num" data-count="70" data-suffix="%">0</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Operational monitoring</span>
+        <span class="stat-num" data-count="24" data-suffix="/7">0</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DIFFERENTIATOR ============ -->
+<section class="differentiator" id="platform">
+  <div class="diff-inner">
+
+    <div class="diff-visual reveal-up">
+      <div class="hub">
+        <div class="hub-pill hub-pill-top">
+          <span class="hub-pill-icon">◆</span> Error correction
+        </div>
+
+        <div class="hub-core-wrap">
+          <svg class="hub-rings" viewBox="0 0 240 240" aria-hidden="true">
+            <circle cx="120" cy="120" r="118" class="hub-halo"/>
+            <ellipse cx="120" cy="120" rx="95" ry="36" class="hub-ring ring-1"/>
+            <ellipse cx="120" cy="120" rx="95" ry="36" class="hub-ring ring-2" transform="rotate(60 120 120)"/>
+            <ellipse cx="120" cy="120" rx="95" ry="36" class="hub-ring ring-3" transform="rotate(120 120 120)"/>
+          </svg>
+          <div class="hub-core">
+            <svg viewBox="0 0 40 40" width="30" height="30">
+              <circle cx="20" cy="20" r="3.4" fill="currentColor"/>
+              <ellipse cx="20" cy="20" rx="17" ry="6.5" stroke="currentColor" stroke-width="1.4" fill="none"/>
+              <ellipse cx="20" cy="20" rx="17" ry="6.5" stroke="currentColor" stroke-width="1.4" fill="none" transform="rotate(60 20 20)"/>
+              <ellipse cx="20" cy="20" rx="17" ry="6.5" stroke="currentColor" stroke-width="1.4" fill="none" transform="rotate(120 20 20)"/>
+            </svg>
+          </div>
+          <svg class="hub-dots" viewBox="0 0 240 240" aria-hidden="true">
+            <path class="dot-path dp1" d="M120,120 L60,195"/>
+            <path class="dot-path dp2" d="M120,120 L195,195"/>
+            <path class="dot-path dp3" d="M120,120 L30,120"/>
+            <path class="dot-path dp4" d="M120,120 L210,120"/>
+          </svg>
+        </div>
+
+        <div class="hub-pill hub-pill-bl">
+          <span class="hub-pill-icon">⌬</span> Cryo stack
+        </div>
+        <div class="hub-pill hub-pill-bm">
+          <span class="hub-pill-icon">⌁</span> Gate control
+        </div>
+        <div class="hub-pill hub-pill-br">
+          <span class="hub-pill-icon">⊙</span> Readout
+        </div>
+      </div>
+    </div>
+
+    <div class="diff-copy">
+      <p class="eyebrow reveal-up">/ What makes Stackly different /</p>
+      <h2 class="diff-title reveal-up">One stack.<br>Zero decoherence.</h2>
+      <p class="diff-body reveal-up" style="--d:0.1s">
+        Quantum advantage isn't a chip problem, it's a systems problem. Stackly
+        unifies cryogenics, microwave control, error mitigation, and a
+        hardware-aware compiler into a single coherent platform, so a circuit
+        you write reaches the qubits with as little noise as physically possible.
+      </p>
+      <a href="#solutions" class="btn btn-dark reveal-up" style="--d:0.2s">Explore platform <span class="arrow">→</span></a>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ SOLUTIONS — numbered slider ============ -->
+<section class="solutions" id="solutions">
+  <p class="eyebrow center reveal-up">/ Solutions /</p>
+  <h2 class="section-title center reveal-up">Our platform.</h2>
+
+  <div class="slider" id="slider">
+
+    <div class="slide-pane">
+      <div class="slide active" data-slide="0">
+        <div class="slide-left">
+          <h3>Integrated control platform</h3>
+          <p>One console for calibration, job scheduling, and live qubit health, so your team spends time on circuits, not on babysitting hardware.</p>
+          <ul class="slide-list">
+            <li>Reduces operator overhead</li>
+            <li>Flags drift before it hits fidelity</li>
+            <li>Live coherence monitoring</li>
+          </ul>
+        </div>
+        <div class="slide-media">
+          <img src="img/engineer.webp" alt="Engineer monitoring quantum processor telemetry on multiple screens">
+          <div class="float-card">
+            <div class="float-card-head">Coherence telemetry</div>
+            <svg class="float-chart" viewBox="0 0 280 110" preserveAspectRatio="none">
+              <polyline class="chart-line chart-1" points="0,90 40,80 80,70 120,75 160,55 200,40 240,30 280,18"/>
+              <polyline class="chart-line chart-2" points="0,100 40,96 80,92 120,90 160,84 200,78 240,70 280,60"/>
+            </svg>
+            <div class="float-card-legend">
+              <span><i class="dot-1"></i>T1 relaxation</span>
+              <span><i class="dot-2"></i>T2 dephasing</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide" data-slide="1">
+        <div class="slide-left">
+          <h3>Hardware-aware compiler</h3>
+          <p>Submit in Qiskit or Cirq. Stackly's transpiler maps your circuit onto the least noisy path on our live chip topology before a single shot runs.</p>
+          <ul class="slide-list">
+            <li>Cuts circuit depth automatically</li>
+            <li>Noise-profile aware routing</li>
+            <li>Works with existing SDKs</li>
+          </ul>
+        </div>
+        <div class="slide-media">
+          <img src="img/circuit.webp" alt="Quantum circuit diagram visualized on a development screen">
+          <div class="float-card">
+            <div class="float-card-head">Circuit compile</div>
+            <svg class="float-chart" viewBox="0 0 280 110" preserveAspectRatio="none">
+              <polyline class="chart-line chart-1" points="0,30 40,45 80,38 120,55 160,42 200,60 240,50 280,65"/>
+              <polyline class="chart-line chart-2" points="0,80 40,70 80,75 120,60 160,65 200,50 240,55 280,40"/>
+            </svg>
+            <div class="float-card-legend">
+              <span><i class="dot-1"></i>Gate depth</span>
+              <span><i class="dot-2"></i>Est. error</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide" data-slide="2">
+        <div class="slide-left">
+          <h3>Managed cryogenic hardware</h3>
+          <p>We design, fabricate, and operate the dilution refrigerators and control electronics ourselves, so the whole stack is tuned as one system.</p>
+          <ul class="slide-list">
+            <li>15mK base temperature</li>
+            <li>In-house chip fabrication</li>
+            <li>Modular cryostat design</li>
+          </ul>
+        </div>
+        <div class="slide-media">
+          <img src="img/board.webp" alt="Close-up of quantum processor control circuit board">
+          <div class="float-card">
+            <div class="float-card-head">Cryostat status</div>
+            <svg class="float-chart" viewBox="0 0 280 110" preserveAspectRatio="none">
+              <polyline class="chart-line chart-1" points="0,95 40,60 80,35 120,20 160,15 200,12 240,10 280,9"/>
+              <polyline class="chart-line chart-2" points="0,100 40,98 80,95 120,90 160,80 200,60 240,40 280,25"/>
+            </svg>
+            <div class="float-card-legend">
+              <span><i class="dot-1"></i>Mixing chamber</span>
+              <span><i class="dot-2"></i>Still stage</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-side">
+      <span class="slide-number" id="slideNumber">01.</span>
+      <button class="slide-next" id="slideNext" aria-label="Next solution">
+        <span class="arrow">→</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="slide-dots" id="slideDots">
+    <button class="slide-dot active" data-go="0" aria-label="Solution 1"></button>
+    <button class="slide-dot" data-go="1" aria-label="Solution 2"></button>
+    <button class="slide-dot" data-go="2" aria-label="Solution 3"></button>
+  </div>
+
+  <a href="#contact" class="btn btn-dark center-btn reveal-up">Explore platform <span class="arrow">→</span></a>
+</section>
+
+<!-- ============ GALLERY — horizontal scroll ============ -->
+<section class="gallery">
+  <div class="gallery-sticky">
+    <p class="eyebrow center reveal-up">/ Inside the lab /</p>
+  <h2 class="section-title center reveal-up">Built, wired, and cooled by hand.</h2>
+
+  <div class="gallery-rail-wrap">
+    <div class="gallery-rail" id="galleryRail">
+      <figure class="gallery-card">
+        <img src="img/fridge.webp" alt="Gold-plated dilution refrigerator cooling a quantum chip" loading="lazy">
+        <figcaption>Dilution refrigerator — 15mK</figcaption>
+      </figure>
+      <figure class="gallery-card">
+        <img src="img/board.webp" alt="Macro detail of control circuit board" loading="lazy">
+        <figcaption>Control circuit fabrication</figcaption>
+      </figure>
+      <figure class="gallery-card">
+        <img src="img/cleanroom.webp" alt="Engineer assembling precision lab hardware" loading="lazy">
+        <figcaption>Cleanroom chip assembly</figcaption>
+      </figure>
+      <figure class="gallery-card">
+        <img src="img/servers.webp" alt="Server racks for classical co-processing" loading="lazy">
+        <figcaption>Classical co-processing racks</figcaption>
+      </figure>
+      <figure class="gallery-card">
+        <img src="img/engineer.webp" alt="Engineer analyzing telemetry on monitors" loading="lazy">
+        <figcaption>Calibration &amp; monitoring</figcaption>
+      </figure>
+      <figure class="gallery-card">
+        <img src="img/drivelines.webp" alt="Detail of microwave drive line wiring" loading="lazy">
+        <figcaption>Microwave drive lines</figcaption>
+      </figure>
+    </div>
+  </div>
+    <p class="gallery-hint">← scroll down to explore →</p>
+  </div>
+</section>
+
+<!-- ============ BENEFITS — 3 card grid ============ -->
+<section class="benefits" id="benefits">
+  <div class="benefits-head">
+    <div>
+      <p class="eyebrow reveal-up">/ Stackly benefits /</p>
+      <h2 class="section-title reveal-up">Our benefits.</h2>
+    </div>
+    <a href="#contact" class="btn btn-outline-dark reveal-up">Work with us</a>
+  </div>
+
+  <div class="benefit-grid">
+
+    <article class="benefit-card reveal-up" style="--d:0.1s">
+      <div class="benefit-mock">
+        <div class="mock-card mock-card-1">
+          <div class="mock-row">
+            <span class="mock-label">Active qubits</span>
+            <span class="mock-dots">⋯</span>
+          </div>
+          <div class="mock-big"><span data-count="112">0</span><span class="mock-unit">/128</span></div>
+          <div class="mock-pill mock-pill-up">↑ 6% vs last week</div>
+        </div>
+        <div class="mock-card mock-card-2">
+          <div class="mock-row">
+            <span class="mock-label">Error rate</span>
+          </div>
+          <div class="mock-big small"><span data-count="0.3" data-suffix="%">0</span></div>
+          <div class="mock-pill mock-pill-down">↓ 12% vs last week</div>
+        </div>
+      </div>
+      <h3>Modular architecture</h3>
+      <p>Scale qubit count, control channels, and compute alongside one another without redesigning the stack each time.</p>
+    </article>
+
+    <article class="benefit-card reveal-up" style="--d:0.2s">
+      <div class="benefit-mock benefit-mock-chart">
+        <div class="mock-chart-head">Resource allocation</div>
+        <div class="mock-donut">
+          <svg viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="48" fill="none" stroke="#E7E3DC" stroke-width="14"/>
+            <circle cx="60" cy="60" r="48" fill="none" stroke="#4D5BFF" stroke-width="14"
+              stroke-dasharray="301.6" stroke-dashoffset="105" stroke-linecap="round" transform="rotate(-90 60 60)"/>
+            <circle cx="60" cy="60" r="48" fill="none" stroke="#9AA3FF" stroke-width="14"
+              stroke-dasharray="301.6" stroke-dashoffset="195" stroke-linecap="round" transform="rotate(160 60 60)"/>
+          </svg>
+        </div>
+        <div class="mock-legend">
+          <div><span class="lg lg-1"></span>Circuit execution<b>65%</b></div>
+          <div><span class="lg lg-2"></span>Calibration<b>22%</b></div>
+          <div><span class="lg lg-3"></span>Idle / cooldown<b>13%</b></div>
+        </div>
+      </div>
+      <h3>Real-time insights</h3>
+      <p>Live dashboards on fidelity, queue depth, and cryostat health, with alerts the moment something drifts out of range.</p>
+    </article>
+
+    <article class="benefit-card reveal-up" style="--d:0.3s">
+      <div class="benefit-mock benefit-mock-chat">
+        <div class="chat-bubble chat-them">Hi Sophie, can Stackly handle a 40-qubit variational circuit on the current backend?</div>
+        <div class="chat-bubble chat-us">Hi John — yes, with our hardware-aware compiler it'll route across our 128-qubit chip well within your error budget.</div>
+        <div class="chat-bubble chat-them small">Great, can it queue automatically once submitted?</div>
+      </div>
+      <h3>Trusted support</h3>
+      <p>A real quantum engineering team answers your questions, from circuit design to error budgets, not a ticket queue.</p>
+    </article>
+
+  </div>
+</section>
+
+<!-- ============ INDUSTRIES ============ -->
+<section class="industries">
+  <p class="eyebrow center reveal-up">/ Who it's for /</p>
+  <h2 class="section-title center reveal-up">Where quantum already wins.</h2>
+
+  <div class="industry-grid">
+    <div class="industry-card reveal-up">
+      <span class="industry-num">01</span>
+      <h3>Molecular &amp; materials simulation</h3>
+      <p>Model electron behavior at a resolution classical computers can't reach, accelerating discovery of batteries, catalysts, and drugs.</p>
+    </div>
+    <div class="industry-card reveal-up">
+      <span class="industry-num">02</span>
+      <h3>Logistics &amp; optimization</h3>
+      <p>Solve routing and scheduling problems with combinatorial complexity that grows exponentially on classical hardware.</p>
+    </div>
+    <div class="industry-card reveal-up">
+      <span class="industry-num">03</span>
+      <h3>Financial modeling</h3>
+      <p>Run Monte Carlo simulations and portfolio risk models with quantum amplitude estimation for measurable speedups.</p>
+    </div>
+    <div class="industry-card reveal-up">
+      <span class="industry-num">04</span>
+      <h3>Cryptography research</h3>
+      <p>Stress-test post-quantum cryptographic schemes on real hardware before classical infrastructure needs to migrate.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ROADMAP — timeline ============ -->
+<section class="roadmap" id="roadmap">
+  <p class="eyebrow center reveal-up">/ Quantum roadmap /</p>
+  <h2 class="section-title center reveal-up">The path to quantum advantage.</h2>
+
+  <div class="timeline">
+
+    <div class="timeline-item reveal-up" style="--d:0.05s">
+      <div class="tl-marker">
+        <span class="tl-dot tl-done"></span>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-card tl-card-done">
+        <span class="tl-tag">2022 — Launched</span>
+        <h3>16-qubit prototype</h3>
+        <p>First full-stack demonstration combining our in-house cryostat, control electronics, and hardware-aware compiler on a 16-qubit superconducting chip.</p>
+      </div>
+    </div>
+
+    <div class="timeline-item reveal-up" style="--d:0.1s">
+      <div class="tl-marker">
+        <span class="tl-dot tl-done"></span>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-card tl-card-done">
+        <span class="tl-tag">2023 — Launched</span>
+        <h3>64-qubit cloud access</h3>
+        <p>Opened cloud API access to research partners. Achieved 99.2 % two-qubit gate fidelity across the full chip, enabling meaningful NISQ workloads.</p>
+      </div>
+    </div>
+
+    <div class="timeline-item reveal-up tl-active" style="--d:0.15s">
+      <div class="tl-marker">
+        <span class="tl-dot tl-current"></span>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-card tl-card-current">
+        <span class="tl-tag">2025 — In progress</span>
+        <h3>128-qubit platform GA</h3>
+        <p>General availability of the 128-qubit platform with real-time error mitigation, priority qubit allocations, and enterprise SLAs. Fidelity benchmarks ongoing.</p>
+        <div class="tl-progress-wrap">
+          <div class="tl-progress-bar"><div class="tl-progress-fill" style="width:72%"></div></div>
+          <span class="tl-progress-label">72% complete</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="timeline-item reveal-up" style="--d:0.2s">
+      <div class="tl-marker">
+        <span class="tl-dot tl-future"></span>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-card tl-card-future">
+        <span class="tl-tag">2026 — Planned</span>
+        <h3>1 000-qubit fault-tolerant system</h3>
+        <p>Surface code error correction enabled across logical qubit clusters, moving workloads from NISQ to fault-tolerant regimes for chemistry and optimization.</p>
+      </div>
+    </div>
+
+    <div class="timeline-item reveal-up" style="--d:0.25s">
+      <div class="tl-marker">
+        <span class="tl-dot tl-future"></span>
+      </div>
+      <div class="tl-card tl-card-future">
+        <span class="tl-tag">2027 — Vision</span>
+        <h3>Quantum advantage at scale</h3>
+        <p>Demonstrated quantum advantage on commercially relevant problems in drug discovery, financial derivatives pricing, and supply-chain optimization.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ TESTIMONIALS ============ -->
+<section class="testimonials" id="testimonials">
+  <p class="eyebrow center reveal-up">/ What researchers say /</p>
+  <h2 class="section-title center reveal-up">Trusted by leading labs.</h2>
+
+  <div class="testi-grid">
+
+    <div class="testi-card reveal-up" style="--d:0.05s">
+      <div class="testi-quote-mark">"</div>
+      <p class="testi-body">Stackly's hardware-aware compiler slashed our circuit depth by 38 % on the very first run. We went from simulated to real-hardware results in under a day — unheard of with any other vendor.</p>
+      <div class="testi-author">
+        <div class="testi-avatar" style="background:var(--ion)">DR</div>
+        <div>
+          <strong>Dr. Riya Desai</strong>
+          <span>Quantum ML Research Lead, IISc Bangalore</span>
+        </div>
+      </div>
+      <div class="testi-stars">★★★★★</div>
+    </div>
+
+    <div class="testi-card testi-card-featured reveal-up" style="--d:0.1s">
+      <div class="testi-quote-mark">"</div>
+      <p class="testi-body">We've been running variational quantum eigensolver experiments for materials simulation. The live coherence telemetry and automatic drift alerts mean our team spends zero time babysitting hardware and everything on actual research.</p>
+      <div class="testi-author">
+        <div class="testi-avatar" style="background:#2E3A8C">JW</div>
+        <div>
+          <strong>James Whitmore</strong>
+          <span>Principal Scientist, Oxford Quantum Materials Lab</span>
+        </div>
+      </div>
+      <div class="testi-stars">★★★★★</div>
+    </div>
+
+    <div class="testi-card reveal-up" style="--d:0.15s">
+      <div class="testi-quote-mark">"</div>
+      <p class="testi-body">The REST API just works. We plugged it into our existing Qiskit workflow with a single config change, and the dedicated engineering support answered our error-budget questions same day.</p>
+      <div class="testi-author">
+        <div class="testi-avatar" style="background:#1B7A6B">YK</div>
+        <div>
+          <strong>Yuki Kimura</strong>
+          <span>CTO, Aethon Fintech Labs</span>
+        </div>
+      </div>
+      <div class="testi-stars">★★★★★</div>
+    </div>
+
+  </div>
+
+  <!-- Logos strip -->
+  <div class="partner-strip reveal-up" style="--d:0.2s">
+    <span class="partner-label">Trusted by teams at</span>
+    <div class="partner-logos">
+      <span class="partner-logo">IISc</span>
+      <span class="partner-divider">·</span>
+      <span class="partner-logo">Oxford QML</span>
+      <span class="partner-divider">·</span>
+      <span class="partner-logo">TIFR</span>
+      <span class="partner-divider">·</span>
+      <span class="partner-logo">Aethon Labs</span>
+      <span class="partner-divider">·</span>
+      <span class="partner-logo">Q-Nano GmbH</span>
+      <span class="partner-divider">·</span>
+      <span class="partner-logo">NUS Physics</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PRICING ============ -->
+<section class="pricing" id="pricing">
+  <p class="eyebrow center reveal-up">/ Pricing /</p>
+  <h2 class="section-title center reveal-up">Pay for compute, not promises.</h2>
+  <p class="pricing-sub center reveal-up" style="--d:0.05s">Transparent shot-based billing with no hidden fees. Scale up or down at any time.</p>
+
+  <div class="pricing-grid">
+
+    <div class="pricing-card reveal-up" style="--d:0.05s">
+      <div class="pricing-header">
+        <span class="pricing-tier">Explorer</span>
+        <div class="pricing-price">
+          <span class="pricing-amount">Free</span>
+        </div>
+        <p class="pricing-desc">Perfect for researchers getting started with real quantum hardware.</p>
+      </div>
+      <ul class="pricing-features">
+        <li><span class="pf-check">✓</span> 10 000 shots / month</li>
+        <li><span class="pf-check">✓</span> 16-qubit access</li>
+        <li><span class="pf-check">✓</span> REST API + Python SDK</li>
+        <li><span class="pf-check">✓</span> Community forum support</li>
+        <li><span class="pf-check pf-x">✗</span> Priority queue</li>
+        <li><span class="pf-check pf-x">✗</span> Dedicated qubit allocation</li>
+      </ul>
+      <a href="#contact" class="btn btn-outline-dark pricing-btn">Get started free</a>
+    </div>
+
+    <div class="pricing-card pricing-card-featured reveal-up" style="--d:0.1s">
+      <div class="pricing-badge">Most popular</div>
+      <div class="pricing-header">
+        <span class="pricing-tier">Research</span>
+        <div class="pricing-price">
+          <span class="pricing-currency">$</span>
+          <span class="pricing-amount">2 400</span>
+          <span class="pricing-period">/ mo</span>
+        </div>
+        <p class="pricing-desc">For active research groups and enterprise quantum teams.</p>
+      </div>
+      <ul class="pricing-features">
+        <li><span class="pf-check">✓</span> 5 million shots / month</li>
+        <li><span class="pf-check">✓</span> Full 128-qubit access</li>
+        <li><span class="pf-check">✓</span> Hardware-aware compiler</li>
+        <li><span class="pf-check">✓</span> Live telemetry dashboard</li>
+        <li><span class="pf-check">✓</span> Priority queue access</li>
+        <li><span class="pf-check">✓</span> Dedicated engineering support</li>
+      </ul>
+      <a href="#contact" class="btn btn-dark pricing-btn">Request access <span class="arrow">→</span></a>
+    </div>
+
+    <div class="pricing-card reveal-up" style="--d:0.15s">
+      <div class="pricing-header">
+        <span class="pricing-tier">Enterprise</span>
+        <div class="pricing-price">
+          <span class="pricing-amount">Custom</span>
+        </div>
+        <p class="pricing-desc">Dedicated qubits, pulse-level access, and white-glove onboarding.</p>
+      </div>
+      <ul class="pricing-features">
+        <li><span class="pf-check">✓</span> Unlimited shots</li>
+        <li><span class="pf-check">✓</span> Reserved qubit allocation</li>
+        <li><span class="pf-check">✓</span> Pulse-level control</li>
+        <li><span class="pf-check">✓</span> Custom error correction</li>
+        <li><span class="pf-check">✓</span> SLA-backed uptime</li>
+        <li><span class="pf-check">✓</span> On-site engineering visits</li>
+      </ul>
+      <a href="#contact" class="btn btn-outline-dark pricing-btn">Talk to sales</a>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ CTA — full bleed photo ============ -->
+<section class="cta-photo">
+  <div class="cta-frame">
+    <img src="img/drivelines.webp" alt="Close-up of glowing quantum processor wiring" class="cta-img">
+    <div class="cta-scrim"></div>
+    <div class="cta-content">
+      <p class="eyebrow light reveal-up">/ Get in touch /</p>
+      <h2 class="cta-title reveal-up">Be part of the next era of computing.</h2>
+      <p class="cta-sub reveal-up" style="--d:0.1s">
+        Tell us what you want to run. Our engineering team will follow up about
+        access, qubit allocation, and pricing within two business days.
+      </p>
+      <div class="cta-social reveal-up" style="--d:0.2s">
+        <a href="#">Facebook</a>
+        <a href="#">X (Twitter)</a>
+        <a href="#">LinkedIn</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CONTACT FORM ============ -->
+<section class="contact" id="contact">
+  <div class="contact-inner">
+    <div class="contact-form-wrap reveal-up">
+      <h3>Request access</h3>
+      <form class="contact-form" id="contactForm">
+        <div class="form-row">
+          <div class="form-field">
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" placeholder="Your full name" required>
+          </div>
+          <div class="form-field">
+            <label for="email">Work email</label>
+            <input type="email" id="email" name="email" placeholder="you@company.com" required>
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="org">Organization</label>
+          <input type="text" id="org" name="org" placeholder="Company, university, or lab">
+        </div>
+        <div class="form-field">
+          <label for="message">What do you want to run?</label>
+          <textarea id="message" name="message" rows="4" placeholder="Briefly describe your workload..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-dark form-submit">Send request <span class="arrow">→</span></button>
+        <p class="form-success" id="formSuccess">Thanks — we'll be in touch within two business days.</p>
+      </form>
+    </div>
+
+    <div class="contact-direct reveal-up" style="--d:0.1s">
+      <div class="contact-item">
+        <span class="contact-label">Call us</span>
+        <a href="tel:+919876543210">+91 98765 43210</a>
+      </div>
+      <div class="contact-item">
+        <span class="contact-label">Visit us</span>
+        <span>Salem, Tamil Nadu, India</span>
+      </div>
+      <div class="contact-item">
+        <span class="contact-label">Email us</span>
+        <a href="mailto:hello@stackly.com">hello@stackly.com</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section class="faq" id="faq">
+  <p class="eyebrow center reveal-up">/ FAQs /</p>
+  <h2 class="section-title center reveal-up">Frequently asked questions.</h2>
+
+  <div class="faq-list" id="faqList">
+    <div class="faq-item active">
+      <button class="faq-q">
+        <span class="faq-num">01.</span>
+        <span class="faq-text">How does Stackly integrate with our current stack?</span>
+        <span class="faq-toggle">›</span>
+      </button>
+      <div class="faq-a">
+        <p>Through a REST API and SDKs for Python, including native support for Qiskit and Cirq circuits. Most teams are running their first job within a day of getting access.</p>
+      </div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q">
+        <span class="faq-num">02.</span>
+        <span class="faq-text">Is specialized hardware required on our end?</span>
+        <span class="faq-toggle">›</span>
+      </button>
+      <div class="faq-a">
+        <p>No. You submit circuits over the cloud from any machine; all the cryogenic and control hardware lives in our facility and is fully managed by our engineering team.</p>
+      </div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q">
+        <span class="faq-num">03.</span>
+        <span class="faq-text">How quickly can we see results after submitting a job?</span>
+        <span class="faq-toggle">›</span>
+      </button>
+      <div class="faq-a">
+        <p>Most circuits return results in seconds to minutes depending on shot count and current queue depth, which you can monitor live from the console.</p>
+      </div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q">
+        <span class="faq-num">04.</span>
+        <span class="faq-text">Can Stackly be tailored for unique research needs?</span>
+        <span class="faq-toggle">›</span>
+      </button>
+      <div class="faq-a">
+        <p>Yes. We work directly with research and enterprise teams on custom pulse-level access, dedicated qubit allocations, and priority queueing.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a href="#top" class="logo">
+        <img src="img/Logo.webp" alt="Stackly Logo" style="height: 80px; width: auto;">
+      </a>
+      <p>Quantum processors, control systems, and software, engineered as one stack.</p>
+      <div class="footer-social">
+        <a href="404.html" aria-label="Facebook">f</a>
+        <a href="404.html" aria-label="X (Twitter)">𝕏</a>
+        <a href="404.html" aria-label="LinkedIn">in</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <a href="service.html">Services</a>
+      <a href="about.html">About</a>
+      <a href="blog.html">Blog</a>
+      <a href="contact.html">Contact</a>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <a href="tel:+919876543210">+91 98765 43210</a>
+      <span>Salem, Tamil Nadu, India</span>
+      <a href="mailto:hello@stackly.com">hello@stackly.com</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Stackly Quantum Systems. All rights reserved.</span>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

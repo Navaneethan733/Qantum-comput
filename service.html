@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Services — Stackly Quantum Computing</title>
+<meta name="description" content="Explore Stackly's quantum cloud platform services, including pulse-level control, compiler optimizations, cryo-hosting, and live telemetry.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="pages.css">
+<style>
+/* nav override */
+.nav{
+  position:sticky; top:0;
+  background:rgba(0,0,0,0.5);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  color:#fff;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+  padding:14px clamp(20px,5.5vw,64px);
+  z-index: 100;
+}
+.nav-links{ color:rgba(255,255,255,0.7); }
+.nav-links a{ color:inherit; }
+.nav-links a:hover{ opacity:1; color:#fff; }
+.nav-sep{ color:rgba(255,255,255,0.3); }
+.nav-social a{ color:#fff; }
+.nav-social a:hover{ opacity:1; color:var(--ion); }
+.hamburger span{ background:#fff; }
+
+/* service metrics */
+.metrics-panel-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  max-width: var(--maxw);
+  margin: 0 auto;
+}
+.metrics-panel-card {
+  background: var(--paper-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.metrics-panel-card h3 {
+  font-family: var(--f-display);
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+.metrics-bar-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.metrics-bar-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+.metrics-bar-track {
+  height: 6px;
+  background: var(--card-2);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+.metrics-bar-fill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  background: var(--ion);
+  border-radius: 999px;
+  transition: width 1.5s var(--ease);
+  width: 0; /* Animated on load/scroll */
+}
+@media(max-width: 768px) {
+  .metrics-panel-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============ PRELOADER ============ -->
+<div class="preloader" id="preloader">
+
+  <!-- Layer 1: Deep space particle canvas -->
+  <canvas id="plCanvas"></canvas>
+
+  <!-- Layer 2: Quantum circuit grid overlay -->
+  <div class="pl-grid"></div>
+
+  <!-- Layer 3: Bloch sphere canvas (main centrepiece) -->
+  <div class="pl-sphere-wrap">
+    <canvas id="plSphere" width="320" height="320"></canvas>
+    <div class="pl-sphere-ring pl-ring-1"></div>
+    <div class="pl-sphere-ring pl-ring-2"></div>
+    <div class="pl-sphere-ring pl-ring-3"></div>
+  </div>
+
+  <!-- Layer 4: Scan-line overlay -->
+  <div class="pl-scanline"></div>
+
+  <!-- Layer 5: Top-left corner HUD -->
+  <div class="pl-hud pl-hud-tl">
+    <span class="pl-hud-label">SYS</span>
+    <span class="pl-hud-val" id="plSysVal">BOOT</span>
+  </div>
+  <div class="pl-hud pl-hud-tr">
+    <span class="pl-hud-label">TEMP</span>
+    <span class="pl-hud-val" id="plTemp">15mK</span>
+  </div>
+  <div class="pl-hud pl-hud-bl">
+    <span class="pl-hud-label">QUBITS</span>
+    <span class="pl-hud-val" id="plQubits">000/128</span>
+  </div>
+  <div class="pl-hud pl-hud-br">
+    <span class="pl-hud-label">FIDELITY</span>
+    <span class="pl-hud-val" id="plFidelity">—</span>
+  </div>
+
+  <!-- Layer 6: Centre UI -->
+  <div class="pl-center">
+    <div class="pl-brand">
+      <div class="pl-brand-line"></div>
+      <span class="pl-brand-word" id="plBrandWord">STACKLY</span>
+      <div class="pl-brand-line"></div>
+    </div>
+    <div class="pl-status-wrap">
+      <span class="pl-cursor">▌</span>
+      <span class="pl-status" id="plStatus">INITIALIZING QUANTUM SYSTEM</span>
+    </div>
+    <div class="pl-progress-outer">
+      <div class="pl-progress-track">
+        <div class="pl-progress-fill" id="plFill"></div>
+        <div class="pl-progress-glow" id="plGlow"></div>
+      </div>
+      <span class="pl-pct" id="plPct">0%</span>
+    </div>
+    <div class="pl-braket" id="plBraket">|Ψ⟩ = α|0⟩ + β|1⟩</div>
+  </div>
+
+  <!-- Layer 7: Binary rain columns -->
+  <canvas id="plRain"></canvas>
+
+</div>
+
+<div class="grain"></div>
+<div class="mobile-menu-backdrop" id="mobileMenuBackdrop"></div>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html">Home</a>
+  <a href="service.html">Services</a>
+  <a href="about.html">About</a>
+  <a href="blog.html">Blog</a>
+  <a href="contact.html">Contact</a>
+  <a href="login.html" class="btn btn-dark" style="margin-top:8px;">Login →</a>
+</div>
+
+<!-- ============ 1. NAV ============ -->
+<header class="nav" id="nav">
+  <a href="index.html" class="logo">
+    <img src="img/Logo.webp" alt="Stackly Logo" style="height:72px;width:auto;">
+  </a>
+  <nav class="nav-links">
+    <a href="index.html">Home</a><span class="nav-sep">/</span>
+    <a href="service.html">Services</a><span class="nav-sep">/</span>
+    <a href="about.html">About</a><span class="nav-sep">/</span>
+    <a href="blog.html">Blog</a><span class="nav-sep">/</span>
+    <a href="contact.html">Contact</a>
+  </nav>
+  <div class="nav-right">
+    <div class="nav-social">
+      <a href="#">f</a><a href="#">𝕏</a><a href="#">in</a>
+    </div>
+    <a href="login.html" class="btn btn-dark nav-cta">Login <span class="arrow">→</span></a>
+  </div>
+  <button class="hamburger" id="hamburger" aria-label="Toggle menu"><span></span><span></span></button>
+</header>
+
+<!-- ============ 2. PAGE HERO ============ -->
+<div class="page-hero">
+  <img src="img/circuit2.webp" alt="Quantum circuit" class="page-hero-img">
+  <div class="page-hero-scrim"></div>
+  <div class="page-hero-inner">
+    <p class="eyebrow reveal-up">/ Services & Platforms /</p>
+    <h1 class="page-hero-title reveal-left">Quantum power.<br>Engineered as a service.</h1>
+    <p class="page-hero-sub reveal-up" style="--d:0.1s">Access superconducting chip topologies, pulse-level control configurations, and deep-level compiling optimizations in a pay-as-you-go developer platform.</p>
+  </div>
+</div>
+
+<!-- ============ 3. MARQUEE ============ -->
+<div class="marquee-section">
+  <div class="marquee-track">
+    <span class="marquee-item">Quantum Cloud Access</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Pulse-Level API Control</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Fidelity Optimization</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Custom Compilers</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Real-Time Telemetry</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Cryo-Hardware Hosting</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Quantum Cloud Access</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Pulse-Level API Control</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Fidelity Optimization</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Custom Compilers</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Real-Time Telemetry</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Cryo-Hardware Hosting</span><span class="marquee-dot">·</span>
+  </div>
+</div>
+
+<!-- ============ 4. CORE SERVICES GRID ============ -->
+<section style="padding:100px var(--pad) 80px;">
+  <div class="section-eyebrow-center reveal-up">
+    <p class="eyebrow">/ Platform capabilities /</p>
+    <h2 class="section-title">What we offer.</h2>
+    <p class="section-sub">A full hardware and software integration designed to match the computational demand of research labs and commercial enterprises.</p>
+  </div>
+
+  <div class="service-grid">
+    <article class="service-card reveal-up" style="--d:0.05s">
+      <div class="service-icon">🌐</div>
+      <h3>Quantum Cloud API</h3>
+      <p>Submit circuits through REST APIs or directly in Python using standard libraries like Qiskit, Cirq, or Pennylane. High-performance job scheduling queues jobs automatically.</p>
+      <a href="contact.html" class="service-card-link">Explore API <span class="arrow">→</span></a>
+    </article>
+
+    <article class="service-card reveal-up" style="--d:0.1s">
+      <div class="service-icon">⚡</div>
+      <h3>Pulse-Level Programming</h3>
+      <p>Bypass compiler logic and manipulate microwave control waves directly to conduct custom calibrations, error mitigating pulses, or gate operations.</p>
+      <a href="contact.html" class="service-card-link">Read documentation <span class="arrow">→</span></a>
+    </article>
+
+    <article class="service-card reveal-up" style="--d:0.15s">
+      <div class="service-icon">⚙</div>
+      <h3>Hardware-Aware Compiling</h3>
+      <p>Our custom transpiler maps logical circuits onto live chip configurations based on active error parameters, drastically cutting dephasing degradation.</p>
+      <a href="contact.html" class="service-card-link">Explore transpiler <span class="arrow">→</span></a>
+    </article>
+
+    <article class="service-card reveal-up" style="--d:0.2s">
+      <div class="service-icon">🧊</div>
+      <h3>Cryogenic Co-Location</h3>
+      <p>Host your custom control electronics or prototype chips directly inside our production dilution refrigerators with 15mK base temperatures.</p>
+      <a href="contact.html" class="service-card-link">Request hosting <span class="arrow">→</span></a>
+    </article>
+
+    <article class="service-card reveal-up" style="--d:0.25s">
+      <div class="service-icon">📊</div>
+      <h3>Live Coherence Telemetry</h3>
+      <p>Access real-time telemetry representing T1 relaxation, T2 dephasing, readouts, and crosstalk matrices before, during, or after running circuits.</p>
+      <a href="contact.html" class="service-card-link">View live panel <span class="arrow">→</span></a>
+    </article>
+
+    <article class="service-card reveal-up" style="--d:0.3s">
+      <div class="service-icon">🧠</div>
+      <h3>Algorithm Consultation</h3>
+      <p>Work directly with our team of theoretical physicists and software experts to optimize variational quantum eigensolvers (VQE) or optimization routines.</p>
+      <a href="contact.html" class="service-card-link">Talk to experts <span class="arrow">→</span></a>
+    </article>
+  </div>
+</section>
+
+<!-- ============ 5. ALTERNATE ROW (CAPABILITY HIGHLIGHT) ============ -->
+<section style="padding:0 var(--pad) 100px;">
+  <div class="alt-row reveal-up">
+    <div class="alt-img">
+      <img src="img/circuit.webp" alt="Visualizing compilation maps">
+      <span class="alt-img-badge">Transpiler Core</span>
+    </div>
+    <div class="alt-copy">
+      <p class="eyebrow" style="color:var(--ion)">/ Noise mitigation /</p>
+      <h3>Noise-profile aware routing.</h3>
+      <p>Stackly's compiler queries the dilution refrigerator's control stack every 15 minutes to retrieve updated gate fidelity matrices. When you submit a circuit, it is routed around the most noisy paths automatically.</p>
+      <ul class="alt-list">
+        <li>Cuts circuit depth by up to 38%</li>
+        <li>Automatic SWAP gate reduction</li>
+        <li>Sub-second transpilation overhead</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6. INTERACTIVE CALCULATOR ============ -->
+<section style="padding:100px var(--pad); background:var(--card);">
+  <div class="section-eyebrow-center reveal-up">
+    <p class="eyebrow">/ Pricing Calculator /</p>
+    <h2 class="section-title">Configure your workload.</h2>
+    <p class="section-sub">Estimate your monthly usage billing based on qubit count, shot volume, and system features. No hidden costs.</p>
+  </div>
+
+  <div class="calc-wrap reveal-up">
+    <div class="calc-left">
+      <div class="calc-title-area">
+        <h3>Deployment parameters</h3>
+        <p>Use the sliders below to adjust your computational requirements. Latency and price metrics will update interactively.</p>
+      </div>
+
+      <div class="calc-group">
+        <div class="calc-label-row">
+          <span>Qubits Allocation</span>
+          <span class="calc-val" id="calcQubitsVal">16 Qubits</span>
+        </div>
+        <div class="calc-slider-wrap">
+          <input type="range" id="calcQubits" class="calc-slider" min="16" max="128" step="16" value="16">
+          <div class="calc-ticks">
+            <span>16</span>
+            <span>32</span>
+            <span>48</span>
+            <span>64</span>
+            <span>80</span>
+            <span>96</span>
+            <span>112</span>
+            <span>128</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="calc-group">
+        <div class="calc-label-row">
+          <span>Monthly Shot Volume</span>
+          <span class="calc-val" id="calcShotsVal">10 K</span>
+        </div>
+        <div class="calc-slider-wrap">
+          <input type="range" id="calcShots" class="calc-slider" min="0" max="6" step="1" value="0">
+          <div class="calc-ticks">
+            <span>10K</span>
+            <span>50K</span>
+            <span>100K</span>
+            <span>500K</span>
+            <span>1M</span>
+            <span>5M</span>
+            <span>10M</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="calc-right">
+      <div class="calc-summary-head">
+        <span class="calc-summary-label">Estimated Price</span>
+        <div class="calc-price-wrap">
+          <span class="calc-price-curr">$</span>
+          <span class="calc-price-val" id="calcPriceVal">Free</span>
+          <span class="calc-price-per">/ month</span>
+        </div>
+      </div>
+
+      <div class="calc-metrics">
+        <div class="calc-metric-row">
+          <span class="calc-metric-label">Avg. Transpile Latency</span>
+          <span class="calc-metric-val" id="calcMetricLatency">0.6s</span>
+        </div>
+        <div class="calc-metric-row">
+          <span class="calc-metric-label">Target Chip Fidelity</span>
+          <span class="calc-metric-val" id="calcMetricFidelity">99.5%</span>
+        </div>
+        <div class="calc-metric-row">
+          <span class="calc-metric-label">Support Tier</span>
+          <span class="calc-metric-val" id="calcMetricSupport">Forum</span>
+        </div>
+      </div>
+
+      <a href="contact.html" class="btn btn-dark" style="width:100%;justify-content:center;">Request allocation <span class="arrow">→</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 7. WORKFLOW / INTEGRATION PROCESS ============ -->
+<section style="padding:100px var(--pad) 80px;">
+  <div class="section-eyebrow-center reveal-up">
+    <p class="eyebrow">/ System Flow /</p>
+    <h2 class="section-title">How a circuit runs.</h2>
+    <p class="section-sub">From local Python scripts to cooled hardware measurements, trace the path of your computation.</p>
+  </div>
+
+  <div class="process-steps">
+    <div class="process-step reveal-up" style="--d:0.05s">
+      <h4>Design & Submit</h4>
+      <p>Submit circuits remotely via the Stackly API using standard Qiskit or Cirq, or upload compiled assembly code.</p>
+    </div>
+    <div class="process-step reveal-up" style="--d:0.1s">
+      <h4>Calibrate & Route</h4>
+      <p>Our system schedules the job and routes it using the transpiler, mapping layout elements onto optimized physical channels.</p>
+    </div>
+    <div class="process-step reveal-up" style="--d:0.15s">
+      <h4>Hardware Execution</h4>
+      <p>Control lines deliver microwave pulses to superconducting Josephson junction qubits in dilution refrigerators cooled to 15mK.</p>
+    </div>
+    <div class="process-step reveal-up" style="--d:0.2s">
+      <h4>Measure & Return</h4>
+      <p>Readout resonators capture state measurements. Results and live system fidelity telemetry are returned to your console.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 8. PERFORMANCE & FIDELITY METRICS PANEL ============ -->
+<section style="padding:0 var(--pad) 100px;">
+  <div class="section-eyebrow-center reveal-up">
+    <p class="eyebrow">/ Telemetry Benchmarks /</p>
+    <h2 class="section-title">Live performance standards.</h2>
+  </div>
+
+  <div class="metrics-panel-grid">
+    <div class="metrics-panel-card reveal-left">
+      <h3>Superconducting Processor Benchmarks</h3>
+      
+      <div class="metrics-bar-group">
+        <div class="metrics-bar-header">
+          <span>Single-Qubit Gate Fidelity</span>
+          <span>99.92%</span>
+        </div>
+        <div class="metrics-bar-track">
+          <div class="metrics-bar-fill" style="width: 99.9%"></div>
+        </div>
+      </div>
+
+      <div class="metrics-bar-group">
+        <div class="metrics-bar-header">
+          <span>Two-Qubit Gate Fidelity (CZ)</span>
+          <span>99.25%</span>
+        </div>
+        <div class="metrics-bar-track">
+          <div class="metrics-bar-fill" style="width: 99.2%"></div>
+        </div>
+      </div>
+
+      <div class="metrics-bar-group">
+        <div class="metrics-bar-header">
+          <span>Readout Fidelity</span>
+          <span>98.80%</span>
+        </div>
+        <div class="metrics-bar-track">
+          <div class="metrics-bar-fill" style="width: 98.8%"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="metrics-panel-card reveal-right">
+      <h3>Cryostat & Control Telemetry</h3>
+      
+      <div class="metrics-bar-group">
+        <div class="metrics-bar-header">
+          <span>Mixing Chamber Base Temperature</span>
+          <span>15.2 mK</span>
+        </div>
+        <div class="metrics-bar-track">
+          <div class="metrics-bar-fill" style="width: 96%"></div>
+        </div>
+      </div>
+
+      <div class="metrics-bar-group">
+        <div class="metrics-bar-header">
+          <span>T1 Coherence Time (Avg. µs)</span>
+          <span>142 µs</span>
+        </div>
+        <div class="metrics-bar-track">
+          <div class="metrics-bar-fill" style="width: 88%"></div>
+        </div>
+      </div>
+
+      <div class="metrics-bar-group">
+        <div class="metrics-bar-header">
+          <span>System Uptime</span>
+          <span>99.98%</span>
+        </div>
+        <div class="metrics-bar-track">
+          <div class="metrics-bar-fill" style="width: 99.9%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 9. Bottom CTA Section ============ -->
+<section class="cta-photo" style="padding:0 var(--pad) 100px;">
+  <div class="cta-frame">
+    <img src="img/cleanroom.webp" alt="Cleanroom chip fabrication" class="cta-img">
+    <div class="cta-scrim"></div>
+    <div class="cta-content">
+      <p class="eyebrow light reveal-up">/ Get Started /</p>
+      <h2 class="cta-title reveal-up">Access production-grade hardware.</h2>
+      <p class="cta-sub reveal-up" style="--d:0.1s">Set up your cloud credentials, consult with our hardware engineers, and execute your first circuit inside a day.</p>
+      <a href="contact.html" class="btn btn-light reveal-up" style="--d:0.2s">Get API Access <span class="arrow">→</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a href="index.html" class="logo">
+        <img src="img/Logo.webp" alt="Stackly Logo" style="height: 60px; width: auto;">
+      </a>
+      <p>Quantum processors, control systems, and software, engineered as one stack.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <a href="service.html">Services</a>
+      <a href="about.html">About</a>
+      <a href="blog.html">Blog</a>
+      <a href="contact.html">Contact</a>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <a href="tel:+919876543210">+91 98765 43210</a>
+      <span>Salem, Tamil Nadu, India</span>
+      <a href="mailto:hello@stackly.com">hello@stackly.com</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Stackly Quantum Systems. All rights reserved.</span>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

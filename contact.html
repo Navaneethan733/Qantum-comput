@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact — Stackly Quantum Computing</title>
+<meta name="description" content="Request access to the Stackly quantum cloud platform, talk to our engineering team, or reach out with any questions.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="pages.css">
+<style>
+/* ── nav override ── */
+.nav{
+  position:sticky; top:0;
+  background:rgba(0,0,0,0.5);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  color:#fff;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+  padding:14px clamp(20px,5.5vw,64px);
+}
+.nav-links{ color:rgba(255,255,255,0.7); }
+.nav-links a{ color:inherit; }
+.nav-links a:hover{ opacity:1; color:#fff; }
+.nav-sep{ color:rgba(255,255,255,0.3); }
+.nav-social a{ color:#fff; }
+.nav-social a:hover{ opacity:1; color:var(--ion); }
+.hamburger span{ background:#fff; }
+
+/* ── page-specific ── */
+.contact-page-wrap{
+  max-width:var(--maxw);
+  margin:0 auto;
+  padding:clamp(56px,8vw,96px) var(--pad);
+}
+
+/* map embed placeholder */
+.map-wrap{
+  border-radius:var(--radius-xl);
+  overflow:hidden;
+  height:320px;
+  background:var(--card);
+  position:relative;
+  border:1px solid var(--line);
+}
+.map-wrap iframe{
+  width:100%;
+  height:100%;
+  border:none;
+  filter:grayscale(25%) contrast(1.05);
+  transition:filter 0.4s ease;
+}
+.map-wrap:hover iframe{ filter:grayscale(0%) contrast(1); }
+.map-pin{
+  position:absolute;
+  top:50%; left:50%;
+  transform:translate(-50%,-60%);
+  width:40px; height:40px;
+  background:var(--ion);
+  border-radius:50% 50% 50% 0;
+  transform:translate(-50%,-60%) rotate(-45deg);
+  box-shadow:0 4px 20px rgba(77,91,255,0.4);
+  animation:pinPulse 2s ease-in-out infinite;
+  pointer-events:none;
+}
+.map-pin::after{
+  content:'';
+  position:absolute;
+  top:50%; left:50%;
+  transform:translate(-50%,-50%) rotate(45deg);
+  width:14px; height:14px;
+  background:#fff;
+  border-radius:50%;
+}
+@keyframes pinPulse{
+  0%,100%{ box-shadow:0 4px 20px rgba(77,91,255,0.4); }
+  50%{ box-shadow:0 4px 36px rgba(77,91,255,0.7); }
+}
+
+/* faq accordion (contact page) */
+.contact-faq{
+  max-width:720px;
+  margin:0 auto;
+}
+.cfaq-item{
+  border-bottom:1px solid var(--line);
+  overflow:hidden;
+}
+.cfaq-q{
+  width:100%;
+  text-align:left;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  padding:22px 0;
+  cursor:pointer;
+  font-family:var(--f-display);
+  font-size:1rem;
+  font-weight:600;
+  color:var(--ink);
+  background:transparent;
+  border:none;
+  transition:color 0.2s ease;
+}
+.cfaq-q:hover{ color:var(--ion); }
+.cfaq-icon{
+  font-size:1.3rem;
+  color:var(--ion);
+  transition:transform 0.3s var(--ease);
+  flex-shrink:0;
+}
+.cfaq-item.open .cfaq-icon{ transform:rotate(45deg); }
+.cfaq-a{
+  font-size:0.92rem;
+  color:var(--ink-soft);
+  line-height:1.7;
+  max-height:0;
+  overflow:hidden;
+  transition:max-height 0.4s var(--ease), padding 0.3s ease;
+}
+.cfaq-item.open .cfaq-a{
+  max-height:280px;
+  padding-bottom:22px;
+}
+
+/* social links */
+.social-links{
+  display:flex;
+  gap:12px;
+  margin-top:24px;
+}
+.social-link{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:999px;
+  padding:10px 18px;
+  font-size:0.82rem;
+  font-weight:600;
+  color:var(--paper);
+  transition:background 0.25s ease, border-color 0.25s ease;
+}
+.social-link:hover{
+  background:rgba(77,91,255,0.25);
+  border-color:rgba(77,91,255,0.5);
+}
+</style>
+</head>
+<body>
+
+<!-- ============ PRELOADER ============ -->
+<div class="preloader" id="preloader">
+
+  <!-- Layer 1: Deep space particle canvas -->
+  <canvas id="plCanvas"></canvas>
+
+  <!-- Layer 2: Quantum circuit grid overlay -->
+  <div class="pl-grid"></div>
+
+  <!-- Layer 3: Bloch sphere canvas (main centrepiece) -->
+  <div class="pl-sphere-wrap">
+    <canvas id="plSphere" width="320" height="320"></canvas>
+    <div class="pl-sphere-ring pl-ring-1"></div>
+    <div class="pl-sphere-ring pl-ring-2"></div>
+    <div class="pl-sphere-ring pl-ring-3"></div>
+  </div>
+
+  <!-- Layer 4: Scan-line overlay -->
+  <div class="pl-scanline"></div>
+
+  <!-- Layer 5: Top-left corner HUD -->
+  <div class="pl-hud pl-hud-tl">
+    <span class="pl-hud-label">SYS</span>
+    <span class="pl-hud-val" id="plSysVal">BOOT</span>
+  </div>
+  <div class="pl-hud pl-hud-tr">
+    <span class="pl-hud-label">TEMP</span>
+    <span class="pl-hud-val" id="plTemp">15mK</span>
+  </div>
+  <div class="pl-hud pl-hud-bl">
+    <span class="pl-hud-label">QUBITS</span>
+    <span class="pl-hud-val" id="plQubits">000/128</span>
+  </div>
+  <div class="pl-hud pl-hud-br">
+    <span class="pl-hud-label">FIDELITY</span>
+    <span class="pl-hud-val" id="plFidelity">—</span>
+  </div>
+
+  <!-- Layer 6: Centre UI -->
+  <div class="pl-center">
+    <div class="pl-brand">
+      <div class="pl-brand-line"></div>
+      <span class="pl-brand-word" id="plBrandWord">STACKLY</span>
+      <div class="pl-brand-line"></div>
+    </div>
+    <div class="pl-status-wrap">
+      <span class="pl-cursor">▌</span>
+      <span class="pl-status" id="plStatus">INITIALIZING QUANTUM SYSTEM</span>
+    </div>
+    <div class="pl-progress-outer">
+      <div class="pl-progress-track">
+        <div class="pl-progress-fill" id="plFill"></div>
+        <div class="pl-progress-glow" id="plGlow"></div>
+      </div>
+      <span class="pl-pct" id="plPct">0%</span>
+    </div>
+    <div class="pl-braket" id="plBraket">|Ψ⟩ = α|0⟩ + β|1⟩</div>
+  </div>
+
+  <!-- Layer 7: Binary rain columns -->
+  <canvas id="plRain"></canvas>
+
+</div>
+
+<div class="grain"></div>
+<div class="mobile-menu-backdrop" id="mobileMenuBackdrop"></div>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html">Home</a>
+  <a href="service.html">Services</a>
+  <a href="about.html">About</a>
+  <a href="blog.html">Blog</a>
+  <a href="contact.html">Contact</a>
+  <a href="login.html" class="btn btn-dark" style="margin-top:8px;">Login →</a>
+</div>
+
+<!-- NAV -->
+<header class="nav" id="nav">
+  <a href="index.html" class="logo">
+    <img src="img/Logo.webp" alt="Stackly Logo" style="height:72px;width:auto;">
+  </a>
+  <nav class="nav-links">
+    <a href="index.html">Home</a><span class="nav-sep">/</span>
+    <a href="service.html">Services</a><span class="nav-sep">/</span>
+    <a href="about.html">About</a><span class="nav-sep">/</span>
+    <a href="blog.html">Blog</a><span class="nav-sep">/</span>
+    <a href="contact.html">Contact</a>
+  </nav>
+  <div class="nav-right">
+    <div class="nav-social">
+      <a href="#">f</a><a href="#">𝕏</a><a href="#">in</a>
+    </div>
+    <a href="login.html" class="btn btn-dark nav-cta">Login <span class="arrow">→</span></a>
+  </div>
+  <button class="hamburger" id="hamburger" aria-label="Toggle menu"><span></span><span></span></button>
+</header>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <img src="img/lab_team.webp" alt="Stackly team" class="page-hero-img">
+  <div class="page-hero-scrim"></div>
+  <div class="page-hero-inner">
+    <p class="eyebrow reveal-up">/ Contact /</p>
+    <h1 class="page-hero-title reveal-up">Let's talk quantum.</h1>
+    <p class="page-hero-sub reveal-up" style="--d:0.1s">Request platform access, ask a technical question, or explore research partnerships — our engineering team responds within two business days.</p>
+  </div>
+</div>
+
+<!-- MARQUEE -->
+<div class="marquee-section">
+  <div class="marquee-track">
+    <span class="marquee-item">Request Access</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Engineering Support</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Research Partnerships</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Enterprise Demos</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Press Inquiries</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Careers</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Request Access</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Engineering Support</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Research Partnerships</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Enterprise Demos</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Press Inquiries</span><span class="marquee-dot">·</span>
+    <span class="marquee-item">Careers</span><span class="marquee-dot">·</span>
+  </div>
+</div>
+
+<!-- MAIN CONTACT SPLIT -->
+<div class="contact-page-wrap">
+
+  <div class="contact-hero-split reveal-up">
+    <!-- LEFT: info -->
+    <div class="contact-hero-left">
+      <div>
+        <p class="eyebrow" style="color:var(--ion-2);margin-bottom:16px;">/ Get in touch /</p>
+        <h2 class="contact-hero-title">We're a team of engineers.<br>We answer our own emails.</h2>
+        <p class="contact-hero-sub" style="margin-top:16px;">Whether you have a technical question about circuit depth limits, want to discuss enterprise pricing, or are a researcher looking for access — reach out directly. No sales funnels, no bots.</p>
+      </div>
+
+      <div class="contact-info-list">
+        <div class="contact-info-item">
+          <div class="contact-info-icon">📞</div>
+          <div>
+            <div class="contact-info-label">Phone</div>
+            <div class="contact-info-value"><a href="tel:+919876543210">+91 98765 43210</a></div>
+          </div>
+        </div>
+        <div class="contact-info-item">
+          <div class="contact-info-icon">✉</div>
+          <div>
+            <div class="contact-info-label">Email</div>
+            <div class="contact-info-value"><a href="mailto:hello@stackly.com">hello@stackly.com</a></div>
+          </div>
+        </div>
+        <div class="contact-info-item">
+          <div class="contact-info-icon">📍</div>
+          <div>
+            <div class="contact-info-label">Headquarters</div>
+            <div class="contact-info-value">Stackly Quantum Systems<br>Salem, Tamil Nadu 636 007, India</div>
+          </div>
+        </div>
+        <div class="contact-info-item">
+          <div class="contact-info-icon">🕐</div>
+          <div>
+            <div class="contact-info-label">Response time</div>
+            <div class="contact-info-value">Within 2 business days</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <p style="font-size:0.8rem;color:rgba(247,245,241,0.4);font-family:var(--f-mono);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;">Follow us</p>
+        <div class="social-links">
+          <a href="#" class="social-link">f Facebook</a>
+          <a href="#" class="social-link">𝕏 Twitter</a>
+          <a href="#" class="social-link">in LinkedIn</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: form -->
+    <div class="contact-form-side">
+      <h3>Send us a message</h3>
+      <p>Fill in what you need and we'll route it to the right person on our team.</p>
+
+      <form id="contactPageForm" onsubmit="handleContactSubmit(event)">
+        <div class="form-row-2">
+          <div class="form-field">
+            <label for="cp-name">Full name *</label>
+            <input type="text" id="cp-name" name="name" placeholder="Dr. Ananya Rao" required>
+          </div>
+          <div class="form-field">
+            <label for="cp-email">Work email *</label>
+            <input type="email" id="cp-email" name="email" placeholder="you@org.com" required>
+          </div>
+        </div>
+        <div class="form-row-2">
+          <div class="form-field">
+            <label for="cp-org">Organization</label>
+            <input type="text" id="cp-org" name="org" placeholder="IISc / Tata Research / ...">
+          </div>
+          <div class="form-field">
+            <label for="cp-topic">Topic *</label>
+            <select id="cp-topic" name="topic" required>
+              <option value="" disabled selected>Select a topic</option>
+              <option>Platform access request</option>
+              <option>Enterprise / dedicated allocation</option>
+              <option>Research partnership</option>
+              <option>Technical question</option>
+              <option>Press / media inquiry</option>
+              <option>Careers</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="cp-msg">Message *</label>
+          <textarea id="cp-msg" name="message" rows="5" placeholder="Tell us what you're working on, what you want to run, or what you'd like to know..." required></textarea>
+        </div>
+        <button type="submit" class="btn btn-dark" style="width:100%;justify-content:center;" id="cp-submit">
+          Send message <span class="arrow">→</span>
+        </button>
+        <div class="form-success-msg" id="cpSuccess">
+          ✓ Message received! We'll reply within two business days.
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+<!-- OFFICES -->
+<section style="padding:0 var(--pad) 80px;">
+  <div class="section-eyebrow-center reveal-up">
+    <p class="eyebrow">/ Where we are /</p>
+    <h2 class="section-title">Our locations.</h2>
+  </div>
+  <div class="offices-grid">
+    <div class="office-card reveal-up">
+      <div class="office-flag">🇮🇳</div>
+      <div class="office-city">Salem, Tamil Nadu</div>
+      <div class="office-addr">Stackly Quantum Systems<br>SIDCO Industrial Estate, Phase II<br>Salem – 636 007, India</div>
+      <span class="office-badge">HQ & Lab</span>
+    </div>
+    <div class="office-card reveal-up" style="--d:0.08s">
+      <div class="office-flag">🇮🇳</div>
+      <div class="office-city">Bengaluru, Karnataka</div>
+      <div class="office-addr">Stackly Software Centre<br>Koramangala, 4th Block<br>Bengaluru – 560 034, India</div>
+      <span class="office-badge">Engineering office</span>
+    </div>
+    <div class="office-card reveal-up" style="--d:0.16s">
+      <div class="office-flag">🇸🇬</div>
+      <div class="office-city">Singapore</div>
+      <div class="office-addr">Stackly Asia-Pacific<br>One-North, Fusionopolis<br>Singapore 138 632</div>
+      <span class="office-badge">APAC partnerships</span>
+    </div>
+  </div>
+</section>
+
+<!-- MAP -->
+<section style="padding:0 var(--pad) 80px;">
+  <div class="map-wrap reveal-up" style="max-width:var(--maxw);margin:0 auto;">
+    <iframe
+      src="https://www.openstreetmap.org/export/embed.html?bbox=78.0%2C11.5%2C78.2%2C11.7&layer=mapnik&marker=11.6643%2C78.1460"
+      title="Stackly HQ — Salem, Tamil Nadu"
+      loading="lazy"
+      allowfullscreen>
+    </iframe>
+  </div>
+</section>
+
+<!-- QUICK CONTACTS -->
+<section style="padding:0 var(--pad) 80px;">
+  <div class="section-eyebrow-center reveal-up">
+    <p class="eyebrow">/ Direct lines /</p>
+    <h2 class="section-title">Reach the right person.</h2>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:var(--maxw);margin:0 auto;">
+    <div class="office-card reveal-up" style="text-align:center;align-items:center;">
+      <div style="font-size:2rem;">⚗</div>
+      <div class="office-city">Engineering Support</div>
+      <div class="office-addr">For technical questions about circuits, fidelity, or compiler behaviour.</div>
+      <a href="mailto:engineering@stackly.com" class="btn btn-outline-dark" style="width:100%;text-align:center;justify-content:center;font-size:0.82rem;">engineering@stackly.com</a>
+    </div>
+    <div class="office-card reveal-up" style="--d:0.08s;text-align:center;align-items:center;">
+      <div style="font-size:2rem;">📊</div>
+      <div class="office-city">Sales & Enterprise</div>
+      <div class="office-addr">Dedicated qubit allocation, custom pricing, and enterprise SLA discussions.</div>
+      <a href="mailto:sales@stackly.com" class="btn btn-outline-dark" style="width:100%;text-align:center;justify-content:center;font-size:0.82rem;">sales@stackly.com</a>
+    </div>
+    <div class="office-card reveal-up" style="--d:0.16s;text-align:center;align-items:center;">
+      <div style="font-size:2rem;">🎓</div>
+      <div class="office-city">Research Partnerships</div>
+      <div class="office-addr">Academic collaborations, joint publications, and access for research groups.</div>
+      <a href="mailto:research@stackly.com" class="btn btn-outline-dark" style="width:100%;text-align:center;justify-content:center;font-size:0.82rem;">research@stackly.com</a>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section style="padding:0 var(--pad) 96px;">
+  <div class="section-eyebrow-center reveal-up">
+    <p class="eyebrow">/ Before you write /</p>
+    <h2 class="section-title">Common questions.</h2>
+  </div>
+  <div class="contact-faq reveal-up">
+    <div class="cfaq-item open">
+      <button class="cfaq-q" onclick="toggleFaq(this)">
+        How quickly will I hear back after submitting the form?
+        <span class="cfaq-icon">+</span>
+      </button>
+      <div class="cfaq-a">We respond to every inbound request within two business days. For engineering support questions from existing users the typical response time is under 24 hours during our working hours (09:00–18:00 IST, Mon–Fri).</div>
+    </div>
+    <div class="cfaq-item">
+      <button class="cfaq-q" onclick="toggleFaq(this)">
+        Can I get a demo of the platform before requesting access?
+        <span class="cfaq-icon">+</span>
+      </button>
+      <div class="cfaq-a">Yes — select "Enterprise / dedicated allocation" or "Platform access request" as the topic and mention you'd like a demo call. We'll set up a 30-minute screen share where one of our engineers walks you through the console, API, and a live circuit execution.</div>
+    </div>
+    <div class="cfaq-item">
+      <button class="cfaq-q" onclick="toggleFaq(this)">
+        Do you offer academic pricing or free research tiers?
+        <span class="cfaq-icon">+</span>
+      </button>
+      <div class="cfaq-a">Yes. We have a free research tier with 10,000 shots per month for university researchers and PhD students. Institutions can also apply for a research partnership grant for larger allocations. Select "Research partnership" in the contact form to start that conversation.</div>
+    </div>
+    <div class="cfaq-item">
+      <button class="cfaq-q" onclick="toggleFaq(this)">
+        I found a bug or unexpected result. Where do I report it?
+        <span class="cfaq-icon">+</span>
+      </button>
+      <div class="cfaq-a">Email engineering@stackly.com with your job ID, circuit, and the observed vs. expected output. For existing users, the console also has a built-in "Report issue" button on every job result page.</div>
+    </div>
+    <div class="cfaq-item">
+      <button class="cfaq-q" onclick="toggleFaq(this)">
+        Are you hiring?
+        <span class="cfaq-icon">+</span>
+      </button>
+      <div class="cfaq-a">We're actively growing the team. Current openings include quantum hardware engineers, control electronics engineers, compiler engineers, and DevRel. Send your CV to careers@stackly.com or select "Careers" in the contact form above.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA STRIP -->
+<section class="cta-photo" style="padding:0 var(--pad) 96px;">
+  <div class="cta-frame">
+    <img src="img/quantum_chip.webp" alt="Quantum chip close-up" class="cta-img">
+    <div class="cta-scrim"></div>
+    <div class="cta-content">
+      <p class="eyebrow light reveal-up">/ Join us /</p>
+      <h2 class="cta-title reveal-up">Ready to run on real quantum hardware?</h2>
+      <p class="cta-sub reveal-up" style="--d:0.1s">Tell us your workload and we'll get you set up within two business days.</p>
+      <a href="#cp-name" class="btn btn-light reveal-up" style="--d:0.2s">Request access now <span class="arrow">→</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a href="index.html" class="logo">
+        <img src="img/Logo.webp" alt="Stackly Logo" style="height: 60px; width: auto;">
+      </a>
+      <p>Quantum processors, control systems, and software, engineered as one stack.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <a href="service.html">Services</a>
+      <a href="about.html">About</a>
+      <a href="blog.html">Blog</a>
+      <a href="contact.html">Contact</a>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <a href="tel:+919876543210">+91 98765 43210</a>
+      <span>Salem, Tamil Nadu, India</span>
+      <a href="mailto:hello@stackly.com">hello@stackly.com</a>
+    </div>
+  </div>
+  <div class="footer-bottom"><span>© 2026 Stackly Quantum Systems. All rights reserved.</span></div>
+</footer>
+
+<script src="script.js"></script>
+<script>
+function handleContactSubmit(e){
+  e.preventDefault();
+  const btn = document.getElementById('cp-submit');
+  btn.textContent = 'Sending…';
+  btn.disabled = true;
+  setTimeout(() => {
+    document.getElementById('cpSuccess').classList.add('show');
+    btn.textContent = 'Sent ✓';
+    e.target.reset();
+  }, 900);
+}
+
+function toggleFaq(btn){
+  const item = btn.closest('.cfaq-item');
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.cfaq-item.open').forEach(i => i.classList.remove('open'));
+  if(!isOpen) item.classList.add('open');
+}
+</script>
+</body>
+</html>
