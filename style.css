@@ -1207,7 +1207,7 @@ section{ position:relative; padding:56px var(--pad); }
 
 @media (max-width:860px){
   .nav{ justify-content:space-between; align-items:center; padding:8px 20px; }
-  .logo img{ height:70px !important; }
+  .logo img{ height:90px !important; }
   .nav-links, .nav-right{ display:none; }
   .hamburger{ display:flex; }
   section{ padding:48px var(--pad); }
@@ -1247,6 +1247,7 @@ section{ position:relative; padding:56px var(--pad); }
 }
 
 @media (max-width:420px){
+  .logo img{ height:80px !important; }
   .hero-title{ font-size:clamp(1.7rem, 8vw, 2.2rem); }
   .gallery-card{ width:82vw; }
   .hero-stats{ grid-template-columns:1fr 1fr; gap:12px; padding:16px; }
