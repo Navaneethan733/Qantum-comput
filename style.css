@@ -760,7 +760,7 @@ section{ position:relative; padding:56px var(--pad); }
 /* ============================================
    GALLERY — horizontal scroll
    ============================================ */
-.gallery{ height: 300vh; padding: 0 !important; }
+.gallery{ height: 100vh; padding: 0 !important; }
 .gallery-sticky{
   position: sticky;
   top: 0;
@@ -769,8 +769,12 @@ section{ position:relative; padding:56px var(--pad); }
   flex-direction: column;
   justify-content: center;
   overflow: hidden;
-  padding: 56px 0;
+  padding: 32px 0;
 }
+.benefits{
+  padding-top: 32px !important;
+}
+
 .gallery-rail-wrap{
   width: 100%;
   overflow: hidden;
@@ -1148,7 +1152,7 @@ section{ position:relative; padding:56px var(--pad); }
   gap:48px;
   padding-bottom:48px;
 }
-.footer-brand .logo img{ filter:invert(1); }
+.footer-brand .logo img{ filter:none; }
 .footer-brand p{ margin-top:12px; color:var(--ink-soft); font-size:0.88rem; max-width:300px; line-height:1.6; }
 .footer-social{ display:flex; gap:14px; margin-top:20px; }
 .footer-social a{
@@ -1207,7 +1211,7 @@ section{ position:relative; padding:56px var(--pad); }
 
 @media (max-width:860px){
   .nav{ justify-content:space-between; align-items:center; padding:8px 20px; }
-  .logo img{ height:90px !important; }
+  .logo img{ height:60px !important; }
   .nav-links, .nav-right{ display:none; }
   .hamburger{ display:flex; }
   section{ padding:48px var(--pad); }
@@ -1247,7 +1251,7 @@ section{ position:relative; padding:56px var(--pad); }
 }
 
 @media (max-width:420px){
-  .logo img{ height:80px !important; }
+  .logo img{ height:50px !important; }
   .hero-title{ font-size:clamp(1.7rem, 8vw, 2.2rem); }
   .gallery-card{ width:82vw; }
   .hero-stats{ grid-template-columns:1fr 1fr; gap:12px; padding:16px; }
